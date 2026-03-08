@@ -1510,18 +1510,18 @@ taskHtml = function(t, day, si, ti, showCheck) {
   const noteDot = note ? '<span class="task-has-note" onclick="toggleTaskNote(this)" title="'+note.replace(/"/g,'&quot;')+'">●</span>' : '';
   const noteHtml = note ? '<div class="task-note-text">'+note+'</div>' : '';
   const check = showCheck
-    ? '<div class="task-check'+(done?' checked':'')+'" onclick="toggleCheck(''+day+'','+si+','+ti+',this);event.stopPropagation()"></div>'
+    ? `<div class="task-check${done?' checked':''}" onclick="toggleCheck('${day}',${si},${ti},this);event.stopPropagation()"></div>`
     : '<span class="pip"></span>';
-  return '<div class="task-row '+t.cat+(done?' done':'')+(note?' has-note':'')+'" draggable="true" data-day="'+day+'" data-si="'+si+'" data-ti="'+ti+'">'
+  return `<div class="task-row ${t.cat}${done?' done':''}${note?' has-note':''}" draggable="true" data-day="${day}" data-si="${si}" data-ti="${ti}">`
     + check
-    + '<span class="pip" style="'+(showCheck?'display:none':'')+'"></span>'
-    + '<span class="t">'+t.time+'</span>'
-    + '<span class="l">'+t.label+noteDot+'</span>'
+    + `<span class="pip" style="${showCheck?'display:none':''}"></span>`
+    + `<span class="t">${t.time}</span>`
+    + `<span class="l">${t.label}${noteDot}</span>`
     + who
     + '<span class="row-btns">'
-    + '<button class="row-btn note-btn" onclick="openNotePrompt(''+day+'','+si+','+ti+',event)" title="Note">📝</button>'
-    + '<button class="row-btn" onclick="openEditModal(''+day+'','+si+','+ti+');event.stopPropagation()">✎</button>'
-    + '<button class="row-btn del" onclick="quickDelete(''+day+'','+si+','+ti+');event.stopPropagation()">✕</button>'
+    + `<button class="row-btn note-btn" onclick="openNotePrompt('${day}',${si},${ti},event)" title="Note">📝</button>`
+    + `<button class="row-btn" onclick="openEditModal('${day}',${si},${ti});event.stopPropagation()">✎</button>`
+    + `<button class="row-btn del" onclick="quickDelete('${day}',${si},${ti});event.stopPropagation()">✕</button>`
     + '</span>'
     + noteHtml
     + '</div>';
