@@ -505,7 +505,7 @@ body{transition:background 0.25s,color 0.25s;}
 
 <script>
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
-const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']];
 const CATS={
   'cat-s':{label:'Szymon',color:'#5B9BD5'},
   'cat-j':{label:'Jarret',color:'#6BBF7A'},
@@ -533,7 +533,7 @@ const JARRET_GREEN_PAY_REF = new Date('2025-03-06'); // opposite weeks → Mar 6
 function getWeekStart(date) {
   const d = new Date(date);
   const dow = d.getDay(); // 0=Sun
-  const diff = (dow === 0 ? -6 : 1 - dow);
+  const diff = (-dow);
   d.setDate(d.getDate() + diff);
   d.setHours(0,0,0,0);
   return d;
