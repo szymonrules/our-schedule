@@ -206,6 +206,89 @@ body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);min-he
   .view{padding:12px 10px 60px;}
   .day-picker{gap:4px;}
 }
+
+/* LIGHT MODE */
+body.light-mode {
+  --bg:#F5F4F0;--surface:#FFFFFF;--surface2:#F0EEE8;--surface3:#E8E5DE;--border:#DDD9D0;
+  --text:#1A1A1E;--muted:#888490;
+}
+body.light-mode .nav { box-shadow: 0 1px 0 var(--border); }
+body.light-mode .bottom-nav { box-shadow: 0 -1px 0 var(--border); }
+
+:root { --bottom-nav-h: 64px; }
+*{transition:background-color 0.2s, color 0.2s, border-color 0.2s;}
+body{transition:background 0.25s,color 0.25s;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-h);background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.bn-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 0;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:'Jost',sans-serif;font-size:0.6rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:color 0.15s;-webkit-tap-highlight-color:transparent;}
+.bn-tab .bn-icon{font-size:1.25rem;line-height:1;transition:transform 0.15s;}
+.bn-tab.active{color:var(--s);}
+.bn-tab.active .bn-icon{transform:scale(1.15);}
+.bn-tab:active .bn-icon{transform:scale(0.92);}
+
+/* FAB */
+.fab{position:fixed;right:20px;bottom:calc(var(--bottom-nav-h) + 16px);width:52px;height:52px;border-radius:50%;background:var(--s);border:none;color:#fff;font-size:1.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(91,155,213,0.45);z-index:99;transition:transform 0.15s,box-shadow 0.15s;-webkit-tap-highlight-color:transparent;}
+.fab:hover{transform:scale(1.08);}
+.fab:active{transform:scale(0.93);}
+
+/* STREAK BANNER */
+.streak-banner-inner{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,200,100,0.07);border:1px solid rgba(255,200,100,0.2);border-radius:10px;margin-bottom:12px;font-size:0.82rem;}
+.streak-flame{font-size:1.3rem;line-height:1;}
+.streak-info{flex:1;}
+.streak-info strong{display:block;font-size:0.88rem;color:var(--clean);}
+.streak-info span{font-size:0.73rem;color:var(--muted);}
+
+/* TASK NOTE */
+.task-has-note{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--muted);opacity:0.5;margin-left:4px;vertical-align:middle;cursor:pointer;}
+.task-note-text{font-size:0.72rem;color:var(--muted);font-style:italic;padding:3px 0 0 24px;line-height:1.4;display:none;width:100%;}
+.task-row.note-open .task-note-text{display:block;}
+.task-row .task-label-wrap{flex:1;display:flex;align-items:baseline;flex-wrap:wrap;}
+.note-btn{border-color:rgba(200,168,232,0.3) !important;background:var(--notes-dim) !important;color:var(--notes) !important;}
+
+/* PIN LOCK */
+.pin-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+.pin-screen.hidden{display:none;}
+.pin-title{font-family:'Playfair Display',serif;font-size:1.6rem;text-align:center;}
+.pin-subtitle{font-size:0.82rem;color:var(--muted);text-align:center;}
+.pin-dots{display:flex;gap:14px;margin:4px 0;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);background:transparent;transition:all 0.15s;}
+.pin-dot.filled{background:var(--s);border-color:var(--s);}
+.pin-dot.error{background:var(--workout);border-color:var(--workout);animation:shake 0.35s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,72px);gap:10px;}
+.pin-key{width:72px;height:72px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Jost',sans-serif;font-size:1.25rem;font-weight:500;cursor:pointer;transition:all 0.1s;-webkit-tap-highlight-color:transparent;}
+.pin-key:hover{background:var(--surface3);}
+.pin-key:active{transform:scale(0.92);background:var(--s-dim);}
+.pin-key.pin-del{font-size:1rem;color:var(--muted);}
+.pin-key.pin-empty{background:transparent;border:none;cursor:default;pointer-events:none;}
+.pin-error-msg{font-size:0.78rem;color:var(--workout);height:18px;text-align:center;}
+.pin-setup-link-btn{font-size:0.77rem;color:var(--muted);background:transparent;border:none;cursor:pointer;text-decoration:underline;margin-top:4px;}
+.pin-setup-step{display:none;}
+.pin-setup-step.active{display:block;}
+
+/* THEME TOGGLE */
+.theme-toggle{display:flex;align-items:center;gap:5px;padding:5px 9px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);cursor:pointer;font-size:0.82rem;color:var(--muted);transition:all 0.15s;}
+.theme-toggle:hover{background:var(--surface3);}
+
+/* PAGE TRANSITIONS */
+.view{animation:fadeIn 0.2s ease;}
+.view.slide-in-right{animation:slideInRight 0.22s ease;}
+.view.slide-in-left{animation:slideInLeft 0.22s ease;}
+@keyframes slideInRight{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* TODAY DATE under day title */
+.day-view-date{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+
+/* bottom padding for views */
+.view{padding-bottom:calc(var(--bottom-nav-h) + 20px) !important;}
+
+/* toast raised above bottom nav */
+.toast{bottom:calc(var(--bottom-nav-h) + 14px) !important;left:50% !important;right:auto !important;transform:translateX(-50%) translateY(20px) !important;}
+.toast.show{transform:translateX(-50%) translateY(0) !important;}
+
 </style>
 </head>
 <body>
@@ -223,6 +306,8 @@ body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);min-he
       <span class="sync-dot" id="sync-dot"></span>
       <span id="sync-label">Checking…</span>
     </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="theme-toggle-btn"><span id="theme-icon">☀️</span></button>
+    <button class="btn" onclick="openPinSetup()" title="PIN settings">🔒</button>
     <button class="btn btn-green" onclick="openIcsModal()">📅 Apple Cal</button>
     <button class="btn" onclick="exportJSON()">⬇ Backup</button>
     <button class="btn" onclick="importJSON()">⬆ Restore</button>
@@ -236,10 +321,12 @@ body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);min-he
   <div class="server-banner" id="server-banner-day">
     <span>🟢</span><span>Connected to shared server — changes sync for both of you!</span>
   </div>
+  <div id="streak-banner-day"></div>
   <div id="payday-banner-day" class="payday-banner"></div>
   <div class="day-view-header">
     <div>
       <h2 id="day-view-title">Monday</h2>
+      <div class="day-view-date" id="day-view-date"></div>
       <div class="day-progress">
         <span id="day-progress-text">0 / 0 done</span>
         <div class="progress-bar"><div class="progress-fill" id="day-progress-bar" style="width:0%"></div></div>
@@ -260,6 +347,7 @@ body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);min-he
   <div class="server-banner" id="server-banner-week">
     <span>🟢</span><span>Connected to shared server — changes sync for both of you!</span>
   </div>
+  <div id="streak-banner-week"></div>
   <div id="payday-banner-week" class="payday-banner"></div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
     <div class="legend" id="legend"></div>
@@ -286,6 +374,7 @@ body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);min-he
   <div class="modal">
     <h2 id="modal-title">Edit Task</h2>
     <div class="field"><label>Description</label><textarea id="f-label" rows="2"></textarea></div>
+    <div class="field"><label>Note <span style="color:var(--muted);font-size:0.75em">(optional)</span></label><textarea id="f-note" rows="2" placeholder="e.g. bring lunch, remember charger…"></textarea></div>
     <div class="row-2">
       <div class="field"><label>Time</label><input type="text" id="f-time" placeholder="e.g. 6:10 AM"></div>
       <div class="field"><label>Day</label>
@@ -335,6 +424,92 @@ body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);min-he
       <strong>For Jarret:</strong> AirDrop or iMessage him his .ics — imports directly.
     </div>
     <div class="modal-actions"><button class="btn" onclick="closeModal('ics-modal')">Close</button></div>
+  </div>
+</div>
+
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="bn-tab active" id="bn-week" onclick="showView('week')">
+    <span class="bn-icon">📋</span>Week
+  </button>
+  <button class="bn-tab" id="bn-day" onclick="showView('day')">
+    <span class="bn-icon">☀️</span>Day
+  </button>
+  <button class="bn-tab" id="bn-calendar" onclick="showView('calendar')">
+    <span class="bn-icon">📆</span>Cal
+  </button>
+  <button class="bn-tab" id="bn-stats" onclick="showView('stats')">
+    <span class="bn-icon">📊</span>Stats
+  </button>
+</nav>
+
+<!-- FAB -->
+<button class="fab" id="fab" onclick="openAddModal()" title="Quick add task">+</button>
+
+<!-- PIN SCREEN -->
+<div class="pin-screen hidden" id="pin-screen">
+  <div class="pin-title">Szymon <em style="font-family:'Playfair Display',serif;font-style:italic;font-weight:400;color:var(--muted)">&</em> Jarret</div>
+  <div class="pin-subtitle" id="pin-subtitle">Enter your PIN to continue</div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-error-msg" id="pin-error"></div>
+  <div class="pin-keypad">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key pin-empty"></button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key pin-del" onclick="pinBackspace()">⌫</button>
+  </div>
+  <button class="pin-setup-link-btn" onclick="openPinSetup()">Set up / change PIN</button>
+</div>
+
+<!-- PIN SETUP MODAL -->
+<div class="overlay" id="pin-setup-modal">
+  <div class="modal" style="max-width:360px;text-align:center;">
+    <h2>🔒 PIN Setup</h2>
+    <div id="pin-setup-step1" class="pin-setup-step active">
+      <p style="color:var(--muted);font-size:0.84rem;margin-bottom:14px">Choose a 4-digit PIN to protect your schedule.</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px">
+        <div class="pin-dot" id="psd0"></div><div class="pin-dot" id="psd1"></div>
+        <div class="pin-dot" id="psd2"></div><div class="pin-dot" id="psd3"></div>
+      </div>
+      <div class="pin-keypad" style="margin:0 auto 12px">
+        <button class="pin-key" onclick="setupKey('1')">1</button><button class="pin-key" onclick="setupKey('2')">2</button><button class="pin-key" onclick="setupKey('3')">3</button>
+        <button class="pin-key" onclick="setupKey('4')">4</button><button class="pin-key" onclick="setupKey('5')">5</button><button class="pin-key" onclick="setupKey('6')">6</button>
+        <button class="pin-key" onclick="setupKey('7')">7</button><button class="pin-key" onclick="setupKey('8')">8</button><button class="pin-key" onclick="setupKey('9')">9</button>
+        <button class="pin-key pin-empty"></button><button class="pin-key" onclick="setupKey('0')">0</button><button class="pin-key pin-del" onclick="setupBackspace()">⌫</button>
+      </div>
+    </div>
+    <div id="pin-setup-step2" class="pin-setup-step">
+      <p style="color:var(--muted);font-size:0.84rem;margin-bottom:14px">Confirm your PIN.</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:6px">
+        <div class="pin-dot" id="psc0"></div><div class="pin-dot" id="psc1"></div>
+        <div class="pin-dot" id="psc2"></div><div class="pin-dot" id="psc3"></div>
+      </div>
+      <div class="pin-error-msg" id="pin-confirm-error" style="margin-bottom:6px"></div>
+      <div class="pin-keypad" style="margin:0 auto 12px">
+        <button class="pin-key" onclick="confirmKey('1')">1</button><button class="pin-key" onclick="confirmKey('2')">2</button><button class="pin-key" onclick="confirmKey('3')">3</button>
+        <button class="pin-key" onclick="confirmKey('4')">4</button><button class="pin-key" onclick="confirmKey('5')">5</button><button class="pin-key" onclick="confirmKey('6')">6</button>
+        <button class="pin-key" onclick="confirmKey('7')">7</button><button class="pin-key" onclick="confirmKey('8')">8</button><button class="pin-key" onclick="confirmKey('9')">9</button>
+        <button class="pin-key pin-empty"></button><button class="pin-key" onclick="confirmKey('0')">0</button><button class="pin-key pin-del" onclick="confirmBackspace()">⌫</button>
+      </div>
+    </div>
+    <div class="modal-actions" style="justify-content:center;flex-wrap:wrap;gap:8px;">
+      <button class="btn btn-danger" id="remove-pin-btn" onclick="removePin()">Remove PIN</button>
+      <button class="btn" onclick="closeModal('pin-setup-modal')">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -664,31 +839,21 @@ function toggleCheck(day, si, ti, el) {
 // ─── SERVER SYNC ──────────────────────────────────────────────────────────────
 async function detectServer() {
   try {
-    setSyncStatus('syncing', 'Connecting…');
-    const r = await fetch('/api/schedule', {signal: AbortSignal.timeout(5000)});
+    const r = await fetch('/api/schedule',{signal:AbortSignal.timeout(900)});
     if (r.ok) {
       isServerMode = true;
+      setSyncStatus('synced','Synced ✓');
+      document.querySelectorAll('.server-banner').forEach(b=>b.classList.add('show'));
       const data = await r.json();
-      if (data) {
-        schedule = data;
-        localStorage.setItem('couple_schedule', JSON.stringify(schedule));
-      }
+      if (data) { schedule = data; localStorage.setItem('couple_schedule', JSON.stringify(schedule)); }
       // Load checked state
       try {
-        const cr = await fetch('/api/checked', {signal: AbortSignal.timeout(5000)});
-        if (cr.ok) {
-          const cd = await cr.json();
-          if (cd) { checked = cd; localStorage.setItem('couple_checked', JSON.stringify(checked)); }
-        }
-      } catch {}
-      setSyncStatus('synced', 'Synced ✓');
+        const cr = await fetch('/api/checked');
+        if (cr.ok) { const cd = await cr.json(); if(cd) { checked = cd; localStorage.setItem('couple_checked', JSON.stringify(checked)); } }
+      } catch{}
       renderCurrentView();
-    } else {
-      setSyncStatus('local', 'Local only');
     }
-  } catch {
-    setSyncStatus('local', 'Local only');
-  }
+  } catch { setSyncStatus('local','Local only'); }
 }
 function setSyncStatus(state,label) {
   const dot = document.getElementById('sync-dot');
@@ -1190,6 +1355,274 @@ document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 detectServer();
 renderWeek();
+
+// ─── THEME ─────────────────────────────────────────────────────────────────
+let isDark = localStorage.getItem('szjr_theme') !== 'light';
+function applyTheme() {
+  document.body.classList.toggle('light-mode', !isDark);
+  const icon = document.getElementById('theme-icon');
+  if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  isDark = !isDark;
+  localStorage.setItem('szjr_theme', isDark ? 'dark' : 'light');
+  applyTheme();
+}
+
+// ─── BOTTOM NAV SYNC ──────────────────────────────────────────────────────
+const origShowView = showView;
+function showView(v) {
+  currentView = v;
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.bn-tab').forEach(x=>x.classList.remove('active'));
+  const el = document.getElementById('view-'+v);
+  el.classList.add('active');
+  el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+  document.getElementById('tab-'+v)?.classList.add('active');
+  document.getElementById('bn-'+v)?.classList.add('active');
+  if (v==='week') renderWeek();
+  if (v==='day') renderDayView();
+  if (v==='calendar') renderCalendar();
+  if (v==='stats') renderStats();
+}
+
+// ─── SWIPE BETWEEN DAYS ───────────────────────────────────────────────────
+let swipeStartX = 0, swipeStartY = 0;
+document.addEventListener('touchstart', e => {
+  swipeStartX = e.touches[0].clientX;
+  swipeStartY = e.touches[0].clientY;
+}, {passive:true});
+document.addEventListener('touchend', e => {
+  if (currentView !== 'day') return;
+  const dx = e.changedTouches[0].clientX - swipeStartX;
+  const dy = e.changedTouches[0].clientY - swipeStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+    const dir = dx < 0 ? 1 : -1;
+    const idx = DAYS.indexOf(currentDay);
+    currentDay = DAYS[(idx+dir+7)%7];
+    const dayEl = document.getElementById('view-day');
+    dayEl.classList.remove('slide-in-right','slide-in-left');
+    void dayEl.offsetWidth;
+    dayEl.classList.add(dx < 0 ? 'slide-in-left' : 'slide-in-right');
+    renderDayView();
+  }
+}, {passive:true});
+
+// ─── TODAY DATE DISPLAY ───────────────────────────────────────────────────
+function getDayDateString(day) {
+  const today = new Date();
+  const map=[6,0,1,2,3,4,5];
+  const todayIdx = map[today.getDay()];
+  const targetIdx = DAYS.indexOf(day);
+  let diff = targetIdx - todayIdx;
+  const d = new Date(today);
+  d.setDate(d.getDate() + diff);
+  return d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+}
+
+// Patch renderDayView to set date
+const _origRenderDayView = renderDayView;
+renderDayView = function() {
+  _origRenderDayView.apply(this, arguments);
+  const el = document.getElementById('day-view-date');
+  if (el) el.textContent = getDayDateString(currentDay);
+};
+
+// ─── STREAK SYSTEM ────────────────────────────────────────────────────────
+function calcStreak() {
+  const streakData = JSON.parse(localStorage.getItem('szjr_streak')||'{}');
+  const now = new Date();
+  const curKey = getWeekKey();
+  const total = DAYS.reduce((a,d)=>a+getDayTaskCount(d),0);
+  const done = DAYS.reduce((a,d)=>a+getDayCheckedCount(d),0);
+  const curPct = total ? Math.round(done/total*100) : 0;
+  streakData[curKey] = curPct;
+  localStorage.setItem('szjr_streak', JSON.stringify(streakData));
+  let streak = 0;
+  const checkDate = new Date(now);
+  for (let i=0; i<52; i++) {
+    const wk = getWeekKey(checkDate);
+    if (wk === curKey) { if (curPct >= 80) streak++; }
+    else if ((streakData[wk]||0) >= 80) streak++;
+    else break;
+    checkDate.setDate(checkDate.getDate()-7);
+  }
+  return {streak, curPct};
+}
+
+function renderStreakBanner(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const {streak, curPct} = calcStreak();
+  if (streak === 0 && curPct < 10) { el.innerHTML=''; return; }
+  let icon='📅', title='', sub='';
+  if (streak >= 3) { icon='🔥'; title=streak+'-week streak!'; sub='You've hit 80%+ for '+streak+' weeks running'; }
+  else if (streak === 2) { icon='🔥'; title='2-week streak!'; sub='Keep it going — hit 80% this week'; }
+  else if (streak === 1) { icon='✨'; title='First week complete!'; sub='Hit 80%+ again to start a streak'; }
+  else { icon='📅'; title='This week: '+curPct+'% done'; sub='Reach 80% completion to start a streak'; }
+  el.innerHTML = '<div class="streak-banner-inner"><span class="streak-flame">'+icon+'</span><div class="streak-info"><strong>'+title+'</strong><span>'+sub+' · This week: '+curPct+'%</span></div></div>';
+}
+
+// Patch toggleCheck to update streak
+const _origToggleCheck = toggleCheck;
+toggleCheck = function(day, si, ti, el) {
+  _origToggleCheck.apply(this, arguments);
+  setTimeout(()=>{
+    renderStreakBanner('streak-banner-day');
+    renderStreakBanner('streak-banner-week');
+  }, 50);
+};
+
+// Patch renderWeek and renderDayView to show streak
+const _origRenderWeek = renderWeek;
+renderWeek = function() {
+  _origRenderWeek.apply(this, arguments);
+  renderStreakBanner('streak-banner-week');
+};
+
+// ─── TASK NOTES (📝 button) ───────────────────────────────────────────────
+let taskNotes = JSON.parse(localStorage.getItem('szjr_task_notes')||'{}');
+function noteKey(day,si,ti){ return day+'-'+si+'-'+ti; }
+function getTaskNote(day,si,ti){ return taskNotes[noteKey(day,si,ti)]||''; }
+function saveTaskNote(day,si,ti,val){
+  const k=noteKey(day,si,ti);
+  if(val) taskNotes[k]=val; else delete taskNotes[k];
+  localStorage.setItem('szjr_task_notes',JSON.stringify(taskNotes));
+}
+function openNotePrompt(day,si,ti,e) {
+  if(e) e.stopPropagation();
+  const cur = getTaskNote(day,si,ti);
+  const val = prompt('Task note (clear to remove):', cur);
+  if (val !== null) {
+    saveTaskNote(day,si,ti,val.trim());
+    renderCurrentView();
+    toast(val.trim() ? 'Note saved ✓' : 'Note removed');
+  }
+}
+
+// Patch taskHtml to include note button and note display
+const _origTaskHtml = taskHtml;
+taskHtml = function(t, day, si, ti, showCheck) {
+  const note = getTaskNote(day,si,ti);
+  const done = isChecked(day, si, ti);
+  const who = t.who ? '<span class="who">'+t.who+'</span>' : '';
+  const noteDot = note ? '<span class="task-has-note" onclick="toggleTaskNote(this)" title="'+note.replace(/"/g,'&quot;')+'">●</span>' : '';
+  const noteHtml = note ? '<div class="task-note-text">'+note+'</div>' : '';
+  const check = showCheck
+    ? '<div class="task-check'+(done?' checked':'')+'" onclick="toggleCheck(''+day+'','+si+','+ti+',this);event.stopPropagation()"></div>'
+    : '<span class="pip"></span>';
+  return '<div class="task-row '+t.cat+(done?' done':'')+(note?' has-note':'')+'" draggable="true" data-day="'+day+'" data-si="'+si+'" data-ti="'+ti+'">'
+    + check
+    + '<span class="pip" style="'+(showCheck?'display:none':'')+'"></span>'
+    + '<span class="t">'+t.time+'</span>'
+    + '<span class="l">'+t.label+noteDot+'</span>'
+    + who
+    + '<span class="row-btns">'
+    + '<button class="row-btn note-btn" onclick="openNotePrompt(''+day+'','+si+','+ti+',event)" title="Note">📝</button>'
+    + '<button class="row-btn" onclick="openEditModal(''+day+'','+si+','+ti+');event.stopPropagation()">✎</button>'
+    + '<button class="row-btn del" onclick="quickDelete(''+day+'','+si+','+ti+');event.stopPropagation()">✕</button>'
+    + '</span>'
+    + noteHtml
+    + '</div>';
+};
+function toggleTaskNote(dotEl) {
+  const row = dotEl.closest('.task-row');
+  if (row) row.classList.toggle('note-open');
+}
+
+// ─── PIN SYSTEM ───────────────────────────────────────────────────────────
+let pinEntry = '', setupPin1 = '', setupPin2 = '';
+const PIN_SALT = 'szjr2024sched';
+function hashPin(p) {
+  let h=0; const s=p+PIN_SALT;
+  for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}
+  return h.toString(16);
+}
+function getStoredPin(){ return localStorage.getItem('szjr_pin'); }
+function setStoredPin(p){ localStorage.setItem('szjr_pin',hashPin(p)); }
+function removeStoredPin(){ localStorage.removeItem('szjr_pin'); }
+function checkPin(p){ return hashPin(p)===getStoredPin(); }
+
+function initPinScreen() {
+  if (!getStoredPin()) return; // no PIN set, skip lock
+  const ps = document.getElementById('pin-screen');
+  if (ps) ps.classList.remove('hidden');
+}
+
+function pinKey(k) {
+  if(pinEntry.length>=4) return;
+  pinEntry+=k; updatePinDots(pinEntry.length,'pd');
+  if(pinEntry.length===4) {
+    setTimeout(()=>{
+      if(checkPin(pinEntry)) { document.getElementById('pin-screen').classList.add('hidden'); pinEntry=''; }
+      else {
+        document.querySelectorAll('#pin-dots .pin-dot').forEach(d=>{d.classList.add('error');d.classList.remove('filled');});
+        document.getElementById('pin-error').textContent='Incorrect PIN';
+        setTimeout(()=>{
+          document.querySelectorAll('#pin-dots .pin-dot').forEach(d=>d.classList.remove('error'));
+          document.getElementById('pin-error').textContent='';
+        },800);
+        pinEntry='';
+      }
+    },120);
+  }
+}
+function pinBackspace(){ if(pinEntry.length>0){pinEntry=pinEntry.slice(0,-1);updatePinDots(pinEntry.length,'pd');} }
+function updatePinDots(n,pfx){ for(let i=0;i<4;i++){const d=document.getElementById(pfx+i);if(d)d.classList.toggle('filled',i<n);} }
+
+function openPinSetup() {
+  setupPin1=''; setupPin2='';
+  document.getElementById('pin-setup-step1').classList.add('active');
+  document.getElementById('pin-setup-step2').classList.remove('active');
+  updatePinDots(0,'psd'); updatePinDots(0,'psc');
+  document.getElementById('pin-confirm-error').textContent='';
+  document.getElementById('remove-pin-btn').style.display=getStoredPin()?'':'none';
+  document.getElementById('pin-setup-modal').classList.add('open');
+}
+function setupKey(k) {
+  if(setupPin1.length>=4) return; setupPin1+=k; updatePinDots(setupPin1.length,'psd');
+  if(setupPin1.length===4){setTimeout(()=>{document.getElementById('pin-setup-step1').classList.remove('active');document.getElementById('pin-setup-step2').classList.add('active');},150);}
+}
+function setupBackspace(){ if(setupPin1.length>0){setupPin1=setupPin1.slice(0,-1);updatePinDots(setupPin1.length,'psd');} }
+function confirmKey(k) {
+  if(setupPin2.length>=4) return; setupPin2+=k; updatePinDots(setupPin2.length,'psc');
+  if(setupPin2.length===4){
+    setTimeout(()=>{
+      if(setupPin1===setupPin2){setStoredPin(setupPin1);closeModal('pin-setup-modal');toast('PIN set ✓');}
+      else{
+        document.getElementById('pin-confirm-error').textContent="PINs don't match — try again";
+        setupPin2=''; updatePinDots(0,'psc');
+        for(let i=0;i<4;i++){const d=document.getElementById('psc'+i);if(d){d.classList.add('error');setTimeout(()=>d.classList.remove('error'),700);}}
+      }
+    },120);
+  }
+}
+function confirmBackspace(){ if(setupPin2.length>0){setupPin2=setupPin2.slice(0,-1);updatePinDots(setupPin2.length,'psc');} }
+function removePin(){ if(confirm('Remove PIN protection?')){removeStoredPin();closeModal('pin-setup-modal');toast('PIN removed');} }
+
+// ─── STATS STREAK CARD ────────────────────────────────────────────────────
+const _origRenderStats = renderStats;
+renderStats = function() {
+  _origRenderStats.apply(this, arguments);
+  const {streak} = calcStreak();
+  // update streak card in stats grid
+  const cards = document.querySelectorAll('#stats-grid .stat-card');
+  cards.forEach(c=>{
+    const lbl=c.querySelector('.stat-lbl');
+    if(lbl&&lbl.textContent.includes('App Dev')){
+      lbl.textContent='🔥 Week Streak';
+      c.querySelector('.stat-val').textContent=streak;
+      c.querySelector('.stat-val').style.color='#FFC864';
+    }
+  });
+};
+
+// ─── INIT OVERRIDES ───────────────────────────────────────────────────────
+applyTheme();
+initPinScreen();
+renderStreakBanner('streak-banner-week');
+
 </script>
 </body>
 </html>
