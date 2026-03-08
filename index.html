@@ -1203,7 +1203,7 @@ function renderCalendar() {
       // keep label short and clean
       const shortLabel = t.label.replace(/^(Szymon —|Jarret —|Both —)\s*/i,'').slice(0,22);
       const leftPct = col===0 ? 1 : col*33;
-      const widthPct = col===0 ? 98 : 65;
+      const widthPct = col===0 ? 98 : 99 - leftPct;
       html+=`<div class="cal-task${done?' done-cal':''}"
         style="top:${y}px;left:${leftPct}%;width:${widthPct}%;background:${c}18;border-left:3px solid ${c};color:${c};z-index:${10+col}"
         onclick="openEditModal('${day}',${si},${ti})" title="${t.time} — ${t.label}">
@@ -1399,7 +1399,7 @@ document.addEventListener('touchend', e => {
 // ─── TODAY DATE DISPLAY ───────────────────────────────────────────────────
 function getDayDateString(day) {
   const today = new Date();
-  const map=[6,0,1,2,3,4,5];
+  const map=[0,1,2,3,4,5,6];
   const todayIdx = map[today.getDay()];
   const targetIdx = DAYS.indexOf(day);
   let diff = targetIdx - todayIdx;
