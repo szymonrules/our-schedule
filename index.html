@@ -228,7 +228,7 @@ body{transition:background 0.25s,color 0.25s;}
 .bn-tab:active .bn-icon{transform:scale(0.92);}
 
 /* FAB */
-.fab{position:fixed;right:20px;bottom:calc(var(--bottom-nav-h) + 16px);width:52px;height:52px;border-radius:50%;background:var(--s);border:none;color:#fff;font-size:1.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(91,155,213,0.45);z-index:99;transition:transform 0.15s,box-shadow 0.15s;-webkit-tap-highlight-color:transparent;}
+.fab{position:fixed;right:20px;bottom:calc(var(--bottom-nav-h) + 16px);width:52px;height:52px;border-radius:50%;background:#1a7a40;border:none;color:#fff;font-size:1.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(26,122,64,0.45);z-index:99;transition:transform 0.15s,box-shadow 0.15s;-webkit-tap-highlight-color:transparent;}
 .fab:hover{transform:scale(1.08);}
 .fab:active{transform:scale(0.93);}
 
@@ -295,12 +295,6 @@ body{transition:background 0.25s,color 0.25s;}
 
 <nav class="nav">
   <span class="nav-title">Szymon <em>&</em> Jarret</span>
-  <div class="nav-tabs">
-    <button class="nav-tab" onclick="showView('day')" id="tab-day">Day</button>
-    <button class="nav-tab active" onclick="showView('week')" id="tab-week">Week</button>
-    <button class="nav-tab" onclick="showView('calendar')" id="tab-calendar">Calendar</button>
-    <button class="nav-tab" onclick="showView('stats')" id="tab-stats">Stats</button>
-  </div>
   <div class="nav-actions">
     <div class="sync-indicator">
       <span class="sync-dot" id="sync-dot"></span>
@@ -312,15 +306,11 @@ body{transition:background 0.25s,color 0.25s;}
     <button class="btn" onclick="exportJSON()">⬇ Backup</button>
     <button class="btn" onclick="importJSON()">⬆ Restore</button>
     <button class="btn" onclick="resetSchedule()">↺ Reset</button>
-    <button class="btn btn-primary" onclick="openAddModal()">+ Task</button>
   </div>
 </nav>
 
 <!-- DAY VIEW -->
 <div class="view" id="view-day">
-  <div class="server-banner" id="server-banner-day">
-    <span>🟢</span><span>Connected to shared server — changes sync for both of you!</span>
-  </div>
   <div id="streak-banner-day"></div>
   <div id="payday-banner-day" class="payday-banner"></div>
   <div class="day-view-header">
@@ -344,9 +334,6 @@ body{transition:background 0.25s,color 0.25s;}
 
 <!-- WEEK VIEW -->
 <div class="view active" id="view-week">
-  <div class="server-banner" id="server-banner-week">
-    <span>🟢</span><span>Connected to shared server — changes sync for both of you!</span>
-  </div>
   <div id="streak-banner-week"></div>
   <div id="payday-banner-week" class="payday-banner"></div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
