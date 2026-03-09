@@ -906,7 +906,15 @@ async function detectServer() {
       setSyncStatus('synced','Synced ✓');
       document.querySelectorAll('.server-banner').forEach(b=>b.classList.add('show'));
       const data = await r.json();
-      if (data) { schedule = data; localStorage.setItem('couple_schedule', JSON.stringify(schedule)); }
+      if (data) {
+        if (data._dateSchedules) {
+          dateSchedules = data._dateSchedules;
+          localStorage.setItem('couple_date_schedules', JSON.stringify(dateSchedules));
+          delete data._dateSchedules;
+        }
+        schedule = data;
+        localStorage.setItem('couple_schedule', JSON.stringify(schedule));
+      }
       // Load checked state
       try {
         const cr = await fetch('/api/checked');
@@ -925,7 +933,7 @@ async function saveToServer() {
   if (!isServerMode) return;
   setSyncStatus('syncing','Saving…');
   try {
-    await fetch('/api/schedule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(schedule)});
+    await fetch('/api/schedule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...schedule, _dateSchedules: dateSchedules})});
     setSyncStatus('synced','Synced ✓');
   } catch { setSyncStatus('error','Sync failed'); }
 }
