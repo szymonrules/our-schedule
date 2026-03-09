@@ -960,18 +960,19 @@ function renderWeekNav(containerId) {
   const mon = getViewWeekMonday();
   const label = formatWeekLabel(mon);
   const isCurrentWeek = viewWeekOffset === 0;
+  const weekTitle = isCurrentWeek ? '📅 This Week' : viewWeekOffset===1 ? '📅 Next Week' : '📅 +' + viewWeekOffset + ' Weeks';
+  const todayBtn = !isCurrentWeek ? '<button class="wk-nav-today-btn" onclick="goToCurrentWeek()">Today\'s Week</button>' : '';
   el.innerHTML = `
     <div class="week-nav-bar">
       <button class="wk-nav-btn" onclick="shiftWeek(-1)" ${viewWeekOffset<=0?'disabled':''}>◀</button>
       <span class="wk-nav-label">
-        ${isCurrentWeek ? '📅 This Week' : viewWeekOffset===1 ? '📅 Next Week' : `📅 +${viewWeekOffset} Weeks`}
+        ${weekTitle}
         <span class="wk-nav-dates">${label}</span>
       </span>
       <button class="wk-nav-btn" onclick="shiftWeek(1)" ${viewWeekOffset>=5?'disabled':''}>▶</button>
-      ${!isCurrentWeek ? '<button class="wk-nav-today-btn" onclick="goToCurrentWeek()">Today's Week</button>' : ''}
+      ${todayBtn}
     </div>`;
 }
-
 function shiftWeek(dir) {
   viewWeekOffset = Math.max(0, Math.min(5, viewWeekOffset + dir));
   renderCurrentView();
