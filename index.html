@@ -61,6 +61,16 @@ body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);min-he
 .dp-btn.today.active{background:var(--j-dim);}
 .dp-btn .dp-check{font-size:0.65rem;opacity:0.7;}
 
+/* WEEK NAVIGATION BAR */
+.week-nav-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.wk-nav-btn{padding:5px 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:0.85rem;transition:all 0.15s;}
+.wk-nav-btn:hover:not(:disabled){color:var(--text);background:var(--surface3);}
+.wk-nav-btn:disabled{opacity:0.35;cursor:default;}
+.wk-nav-label{flex:1;font-size:0.82rem;font-weight:600;color:var(--text);display:flex;flex-direction:column;gap:1px;}
+.wk-nav-dates{font-size:0.7rem;color:var(--muted);font-weight:400;}
+.wk-nav-today-btn{padding:4px 10px;border-radius:8px;border:1px solid rgba(107,191,122,0.35);background:var(--j-dim);color:var(--j);cursor:pointer;font-size:0.75rem;font-weight:600;transition:all 0.15s;}
+.wk-nav-today-btn:hover{background:rgba(107,191,122,0.25);}
+
 /* DAY VIEW */
 .day-view-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
 .day-view-header h2{font-family:'Playfair Display',serif;font-size:1.5rem;}
@@ -312,6 +322,7 @@ body{transition:background 0.25s,color 0.25s;}
 <!-- DAY VIEW -->
 <div class="view" id="view-day">
   <div id="streak-banner-day"></div>
+  <div id="week-nav-day"></div>
   <div id="payday-banner-day" class="payday-banner"></div>
   <div class="day-view-header">
     <div>
@@ -335,6 +346,7 @@ body{transition:background 0.25s,color 0.25s;}
 <!-- WEEK VIEW -->
 <div class="view active" id="view-week">
   <div id="streak-banner-week"></div>
+  <div id="week-nav"></div>
   <div id="payday-banner-week" class="payday-banner"></div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
     <div class="legend" id="legend"></div>
@@ -794,8 +806,8 @@ let editing = null, dragSrc = null, isServerMode = false;
 // getDay(): 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
 // DAYS array: 0=Mon,1=Tue,2=Wed,3=Thu,4=Fri,5=Sat,6=Sun
 function todayDayName() {
-  const map = [6,0,1,2,3,4,5]; // Sun→Sun(6), Mon→Mon(0)...Sat→Sat(5)
-  return DAYS[map[new Date().getDay()]];
+  // DAYS = ['Sunday','Monday',...,'Saturday'] matches getDay() 0-6 directly
+  return DAYS[new Date().getDay()];
 }
 let currentDay = todayDayName();
 
@@ -810,7 +822,69 @@ function getWeekKey(date) {
 }
 const CUR_WEEK = getWeekKey();
 
-function taskKey(day, si, ti) { return `${CUR_WEEK}-${day}-${si}-${ti}`; }
+// ─── MULTI-WEEK / MONTH-OUT SCHEDULING ────────────────────────────────────────
+let viewWeekOffset = 0; // 0=current week, 1=next week, up to 5 weeks out
+
+function getViewWeekMonday() {
+  const d = getTodayMonday();
+  d.setDate(d.getDate() + viewWeekOffset * 7);
+  return d;
+}
+
+function getViewWeekKey() {
+  return getWeekKey(getViewWeekMonday());
+}
+
+// Date-specific schedule overrides: { 'YYYY-MM-DD': { sections: [...], tags: [...] } }
+let dateSchedules = JSON.parse(localStorage.getItem('couple_date_schedules') || '{}');
+
+function saveDateSchedules() {
+  localStorage.setItem('couple_date_schedules', JSON.stringify(dateSchedules));
+}
+
+function toDateStr(date) {
+  return date.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+// Get the calendar date for a given day name in the viewed week
+function getDateForDay(dayName) {
+  const mon = getViewWeekMonday();
+  const idx = DAYS.indexOf(dayName); // 0=Sun,1=Mon,...,6=Sat
+  // Sun is at end of week: offset = idx === 0 ? 6 : idx - 1
+  const offset = idx === 0 ? 6 : idx - 1;
+  const d = new Date(mon);
+  d.setDate(d.getDate() + offset);
+  return d;
+}
+
+// Get the effective schedule for a day in the viewed week
+// Returns date-specific override if it exists, otherwise the default weekly schedule
+function getScheduleForDay(dayName) {
+  const d = getDateForDay(dayName);
+  const ds = toDateStr(d);
+  if (dateSchedules[ds]) return dateSchedules[ds];
+  return schedule[dayName];
+}
+
+// Ensure a date-specific schedule exists (copies from weekly template if needed)
+function ensureDateSchedule(dayName) {
+  const ds = toDateStr(getDateForDay(dayName));
+  if (!dateSchedules[ds]) {
+    dateSchedules[ds] = deepClone(schedule[dayName]);
+    saveDateSchedules();
+  }
+  return ds;
+}
+
+// Format week label e.g. "Mar 9 – Mar 15"
+function formatWeekLabel(monday) {
+  const sun = new Date(monday);
+  sun.setDate(sun.getDate() + 6);
+  const fmt = (d) => d.toLocaleDateString('en-US', {month:'short',day:'numeric'});
+  return fmt(monday) + ' – ' + fmt(sun);
+}
+
+function taskKey(day, si, ti) { return `${getViewWeekKey()}-${day}-${si}-${ti}`; }
 function isChecked(day, si, ti) { return !!checked[taskKey(day,si,ti)]; }
 function toggleCheck(day, si, ti, el) {
   const k = taskKey(day,si,ti);
@@ -861,6 +935,7 @@ async function saveCheckToServer() {
 }
 function save() {
   localStorage.setItem('couple_schedule', JSON.stringify(schedule));
+  saveDateSchedules();
   saveToServer();
 }
 
@@ -876,6 +951,36 @@ function renderPaydayBanner(containerId) {
   }).join('');
   el.innerHTML = `<span>💰 This week's paydays:</span> ${pills}`;
   el.classList.add('show');
+}
+
+// ─── WEEK NAVIGATION ──────────────────────────────────────────────────────────
+function renderWeekNav(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const mon = getViewWeekMonday();
+  const label = formatWeekLabel(mon);
+  const isCurrentWeek = viewWeekOffset === 0;
+  el.innerHTML = `
+    <div class="week-nav-bar">
+      <button class="wk-nav-btn" onclick="shiftWeek(-1)" ${viewWeekOffset<=0?'disabled':''}>◀</button>
+      <span class="wk-nav-label">
+        ${isCurrentWeek ? '📅 This Week' : viewWeekOffset===1 ? '📅 Next Week' : `📅 +${viewWeekOffset} Weeks`}
+        <span class="wk-nav-dates">${label}</span>
+      </span>
+      <button class="wk-nav-btn" onclick="shiftWeek(1)" ${viewWeekOffset>=5?'disabled':''}>▶</button>
+      ${!isCurrentWeek ? '<button class="wk-nav-today-btn" onclick="goToCurrentWeek()">Today's Week</button>' : ''}
+    </div>`;
+}
+
+function shiftWeek(dir) {
+  viewWeekOffset = Math.max(0, Math.min(5, viewWeekOffset + dir));
+  renderCurrentView();
+}
+
+function goToCurrentWeek() {
+  viewWeekOffset = 0;
+  currentDay = todayDayName();
+  renderCurrentView();
 }
 
 // ─── VIEWS ────────────────────────────────────────────────────────────────────
@@ -902,44 +1007,47 @@ function renderCurrentView() {
 function renderDayPicker(containerId, activeFn, clickFn) {
   const today = todayDayName();
   const el = document.getElementById(containerId);
-  const mon = getTodayMonday();
+  const mon = getViewWeekMonday();
   const pays = getPaydaysForWeek(mon);
   el.innerHTML = DAYS.map(d => {
     const done = getDayCheckedCount(d);
     const total = getDayTaskCount(d);
     const isPay = pays.some(p=>p.day===d);
-    const isToday = d === today;
+    const dateObj = getDateForDay(d);
+    const isToday = viewWeekOffset === 0 && d === today;
+    const dateLabel = dateObj.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     const isActive = activeFn(d);
     let cls = 'dp-btn';
     if (isActive) cls += ' active';
     if (isToday) cls += ' today';
     const checkIcon = done > 0 ? `<span class="dp-check">${done}/${total}</span>` : '';
     const payIcon = isPay ? ' 💰' : '';
-    return `<button class="${cls}" onclick="${clickFn}('${d}')">${d.slice(0,3)}${payIcon} ${checkIcon}</button>`;
+    return `<button class="${cls}" onclick="${clickFn}('${d}')">${d.slice(0,3)} <span style="font-size:0.65rem;opacity:0.7">${dateLabel}</span>${payIcon} ${checkIcon}</button>`;
   }).join('');
 }
 
 function getDayTaskCount(day) {
-  return schedule[day].sections.reduce((a,s)=>a+s.tasks.length,0);
+  return getScheduleForDay(day).sections.reduce((a,s)=>a+s.tasks.length,0);
 }
 function getDayCheckedCount(day) {
   let n=0;
-  schedule[day].sections.forEach((sec,si)=>sec.tasks.forEach((_,ti)=>{if(isChecked(day,si,ti))n++;}));
+  getScheduleForDay(day).sections.forEach((sec,si)=>sec.tasks.forEach((_,ti)=>{if(isChecked(day,si,ti))n++;}));
   return n;
 }
 
 // ─── WEEK VIEW ────────────────────────────────────────────────────────────────
 function renderWeek() {
   renderPaydayBanner('payday-banner-week');
+  renderWeekNav('week-nav');
   renderDayPicker('day-picker-week', d=>false, 'jumpToDay');
   const grid = document.getElementById('week-grid');
   grid.innerHTML = '';
   DAYS.forEach(day => {
-    const d = schedule[day];
+    const d = getScheduleForDay(day);
     const done = getDayCheckedCount(day);
     const total = getDayTaskCount(day);
     const pct = total ? Math.round(done/total*100) : 0;
-    const mon = getTodayMonday();
+    const mon = getViewWeekMonday();
     const pays = getPaydaysForWeek(mon);
     const hasPay = pays.some(p=>p.day===day);
     const tags = [...(d.tags||[]),...(hasPay?['💰 Payday']:[])]
@@ -1007,12 +1115,13 @@ function goToToday() {
 function renderDayView() {
   const day = currentDay;
   renderPaydayBanner('payday-banner-day');
-  document.getElementById('day-view-title').textContent = day;
+  renderWeekNav('week-nav-day');
+  document.getElementById('day-view-title').textContent = day + ' · ' + toDateStr(getDateForDay(day));
   updateDayProgress(day);
   renderDayPicker('day-picker-day', d=>d===day, 'setDay');
 
-  const d = schedule[day];
-  const mon = getTodayMonday();
+  const d = getScheduleForDay(day);
+  const mon = getViewWeekMonday();
   const pays = getPaydaysForWeek(mon);
   const hasPay = pays.some(p=>p.day===day);
   const tags = [...(d.tags||[]),...(hasPay?['💰 Payday']:[])]
@@ -1088,8 +1197,10 @@ function initDrag() {
       if (!dragSrc) return;
       const tgt = {day:row.dataset.day, si:+row.dataset.si, ti:+row.dataset.ti};
       if (dragSrc.day===tgt.day && dragSrc.si===tgt.si && dragSrc.ti===tgt.ti) return;
-      const [moved] = schedule[dragSrc.day].sections[dragSrc.si].tasks.splice(dragSrc.ti,1);
-      schedule[tgt.day].sections[tgt.si].tasks.splice(tgt.ti,0,moved);
+      const dsSrc = ensureDateSchedule(dragSrc.day);
+      const dsTgt = ensureDateSchedule(tgt.day);
+      const [moved] = dateSchedules[dsSrc].sections[dragSrc.si].tasks.splice(dragSrc.ti,1);
+      dateSchedules[dsTgt].sections[tgt.si].tasks.splice(tgt.ti,0,moved);
       save(); renderCurrentView(); toast('Moved ✓');
     });
   });
@@ -1098,16 +1209,17 @@ function initDrag() {
 // ─── SECTIONS ─────────────────────────────────────────────────────────────────
 function addSection(day) {
   const n = prompt('Section name:');
-  if (n?.trim()) { schedule[day].sections.push({label:n.trim(),tasks:[]}); save(); renderCurrentView(); }
+  if (n?.trim()) { const ds=ensureDateSchedule(day); dateSchedules[ds].sections.push({label:n.trim(),tasks:[]}); save(); renderCurrentView(); }
 }
 function renameSection(day, si) {
-  const n = prompt('Rename section:', schedule[day].sections[si].label);
-  if (n?.trim()) { schedule[day].sections[si].label=n.trim(); save(); renderCurrentView(); }
+  const n = prompt('Rename section:', getScheduleForDay(day).sections[si].label);
+  if (n?.trim()) { const ds=ensureDateSchedule(day); dateSchedules[ds].sections[si].label=n.trim(); save(); renderCurrentView(); }
 }
 
 // ─── MODAL ────────────────────────────────────────────────────────────────────
 function openEditModal(day, si, ti) {
-  const t = schedule[day].sections[si].tasks[ti];
+  const sched = getScheduleForDay(day);
+  const t = sched.sections[si].tasks[ti];
   editing = {day, si, ti};
   document.getElementById('modal-title').textContent = 'Edit Task';
   document.getElementById('f-label').value = t.label;
@@ -1115,7 +1227,7 @@ function openEditModal(day, si, ti) {
   document.getElementById('f-cat').value = t.cat;
   document.getElementById('f-who').value = t.who||'';
   document.getElementById('f-day').value = day;
-  document.getElementById('f-section').value = schedule[day].sections[si].label;
+  document.getElementById('f-section').value = sched.sections[si].label;
   document.getElementById('del-btn').style.display = 'block';
   document.getElementById('task-modal').classList.add('open');
 }
@@ -1127,7 +1239,7 @@ function openAddModal(day, si) {
   document.getElementById('f-cat').value = 'cat-shared';
   document.getElementById('f-who').value = '';
   document.getElementById('f-day').value = day||'Monday';
-  document.getElementById('f-section').value = si!==undefined ? schedule[day].sections[si].label : '';
+  document.getElementById('f-section').value = si!==undefined ? getScheduleForDay(day).sections[si].label : '';
   document.getElementById('del-btn').style.display = 'none';
   document.getElementById('task-modal').classList.add('open');
 }
@@ -1140,25 +1252,30 @@ function saveTask() {
   const secName = document.getElementById('f-section').value.trim();
   if (editing) {
     const {day:od, si:osi, ti:oti} = editing;
-    schedule[od].sections[osi].tasks.splice(oti,1);
-    let tsi = schedule[day].sections.findIndex(s=>s.label===secName);
-    if (tsi<0) { schedule[day].sections.push({label:secName||'General',tasks:[]}); tsi=schedule[day].sections.length-1; }
-    schedule[day].sections[tsi].tasks.push(t);
+    const dsOld = ensureDateSchedule(od);
+    dateSchedules[dsOld].sections[osi].tasks.splice(oti,1);
+    const dsNew = ensureDateSchedule(day);
+    let tsi = dateSchedules[dsNew].sections.findIndex(s=>s.label===secName);
+    if (tsi<0) { dateSchedules[dsNew].sections.push({label:secName||'General',tasks:[]}); tsi=dateSchedules[dsNew].sections.length-1; }
+    dateSchedules[dsNew].sections[tsi].tasks.push(t);
   } else {
-    let si = schedule[day].sections.findIndex(s=>s.label===secName);
-    if (si<0) { schedule[day].sections.push({label:secName||'General',tasks:[]}); si=schedule[day].sections.length-1; }
-    schedule[day].sections[si].tasks.push(t);
+    const ds = ensureDateSchedule(day);
+    let si = dateSchedules[ds].sections.findIndex(s=>s.label===secName);
+    if (si<0) { dateSchedules[ds].sections.push({label:secName||'General',tasks:[]}); si=dateSchedules[ds].sections.length-1; }
+    dateSchedules[ds].sections[si].tasks.push(t);
   }
   save(); closeModal('task-modal'); renderCurrentView(); toast('Saved ✓');
 }
 function deleteTask() {
   if (!editing) return;
-  schedule[editing.day].sections[editing.si].tasks.splice(editing.ti,1);
+  const ds = ensureDateSchedule(editing.day);
+  dateSchedules[ds].sections[editing.si].tasks.splice(editing.ti,1);
   save(); closeModal('task-modal'); renderCurrentView(); toast('Deleted');
 }
 function quickDelete(day, si, ti) {
   if (!confirm('Delete this task?')) return;
-  schedule[day].sections[si].tasks.splice(ti,1);
+  const ds = ensureDateSchedule(day);
+  dateSchedules[ds].sections[si].tasks.splice(ti,1);
   save(); renderCurrentView(); toast('Deleted');
 }
 
@@ -1184,7 +1301,7 @@ function renderCalendar() {
 
     // collect tasks with y positions, then offset overlapping ones
     const items = [];
-    schedule[day].sections.forEach((sec,si)=>sec.tasks.forEach((t,ti)=>{
+    getScheduleForDay(day).sections.forEach((sec,si)=>sec.tasks.forEach((t,ti)=>{
       const y=toY(t.time); if(y<0) return;
       items.push({t,si,ti,y});
     }));
@@ -1222,7 +1339,7 @@ function renderCalendar() {
 function renderStats() {
   const cnt={},chk={}; let total=0, totalDone=0;
   Object.keys(CATS).forEach(k=>{cnt[k]=0;chk[k]=0;});
-  DAYS.forEach(d=>schedule[d].sections.forEach((sec,si)=>sec.tasks.forEach((t,ti)=>{
+  DAYS.forEach(d=>getScheduleForDay(d).sections.forEach((sec,si)=>sec.tasks.forEach((t,ti)=>{
     cnt[t.cat]=(cnt[t.cat]||0)+1; total++;
     if (isChecked(d,si,ti)) { chk[t.cat]=(chk[t.cat]||0)+1; totalDone++; }
   })));
@@ -1233,10 +1350,10 @@ function renderStats() {
     {l:'Meals planned',v:cnt['cat-food'],c:'#E09B4A'},{l:'App Dev blocks',v:cnt['cat-appdev'],c:'#B48CFF'},
   ].map(s=>`<div class="stat-card"><div class="stat-val" style="color:${s.c}">${s.v}</div><div class="stat-lbl">${s.l}</div></div>`).join('');
   document.getElementById('stats-days').innerHTML=`<div class="week-grid">`+DAYS.map(d=>{
-    const n=schedule[d].sections.reduce((a,s)=>a+s.tasks.length,0);
+    const n=getScheduleForDay(d).sections.reduce((a,s)=>a+s.tasks.length,0);
     const done=getDayCheckedCount(d);
     const pct=n?Math.round(done/n*100):0;
-    const w=schedule[d].sections.some(s=>s.tasks.some(t=>t.cat==='cat-workout'));
+    const w=getScheduleForDay(d).sections.some(s=>s.tasks.some(t=>t.cat==='cat-workout'));
     return `<div class="stat-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <span style="font-family:'Playfair Display',serif;font-size:1.05rem">${d}</span>
@@ -1325,9 +1442,9 @@ function handleImport(e) {
   r.readAsText(file); e.target.value='';
 }
 function resetSchedule() {
-  if (confirm('Reset to original schedule? Checkmarks will also be cleared.')) {
-    schedule=deepClone(DEFAULT); checked={};
-    save(); localStorage.setItem('couple_checked','{}');
+  if (confirm('Reset to original schedule? Checkmarks and date-specific schedules will also be cleared.')) {
+    schedule=deepClone(DEFAULT); checked={}; dateSchedules={};
+    save(); localStorage.setItem('couple_checked','{}'); localStorage.removeItem('couple_date_schedules');
     renderCurrentView(); toast('Reset to original ✓');
   }
 }
