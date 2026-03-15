@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Szymon & Jarret — Schedule</title>
+<title>Szymon & Jarret â Schedule</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -129,7 +129,7 @@ body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);min-he
 .task-check{width:16px;height:16px;border-radius:4px;border:1.5px solid;flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.12s;background:transparent;}
 .task-check:hover{transform:scale(1.15);}
 .task-check.checked{background:currentColor;}
-.task-check.checked::after{content:'✓';font-size:10px;color:var(--bg);font-weight:700;line-height:1;}
+.task-check.checked::after{content:'â';font-size:10px;color:var(--bg);font-weight:700;line-height:1;}
 
 .task-row .pip{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0;}
 .task-row .t{font-size:0.67rem;font-weight:600;min-width:52px;color:var(--muted);padding-top:1px;flex-shrink:0;}
@@ -299,6 +299,15 @@ body{transition:background 0.25s,color 0.25s;}
 .toast{bottom:calc(var(--bottom-nav-h) + 14px) !important;left:50% !important;right:auto !important;transform:translateX(-50%) translateY(20px) !important;}
 .toast.show{transform:translateX(-50%) translateY(0) !important;}
 
+
+/* CONFLICT WARNINGS */
+.conflict-banner{background:rgba(224,90,90,0.12);border:1px solid rgba(224,90,90,0.35);border-radius:9px;padding:10px 14px;margin-bottom:12px;font-size:0.81rem;display:none;color:var(--workout);}
+.conflict-banner.show{display:block;}
+.conflict-banner ul{margin:4px 0 0 14px;font-size:0.77rem;line-height:1.7;}
+.modal-conflict{background:rgba(224,90,90,0.1);border:1px solid rgba(224,90,90,0.3);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:0.78rem;color:var(--workout);display:none;}
+.modal-conflict.show{display:block;}
+.modal-conflict ul{margin:4px 0 0 14px;line-height:1.7;}
+.task-row.conflict-task::after{content:'⚠';font-size:0.7rem;position:absolute;right:4px;top:2px;color:var(--workout);opacity:0.7;pointer-events:none;}
 </style>
 </head>
 <body>
@@ -308,14 +317,14 @@ body{transition:background 0.25s,color 0.25s;}
   <div class="nav-actions">
     <div class="sync-indicator">
       <span class="sync-dot" id="sync-dot"></span>
-      <span id="sync-label">Checking…</span>
+      <span id="sync-label">Checkingâ¦</span>
     </div>
-    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="theme-toggle-btn"><span id="theme-icon">☀️</span></button>
-    <button class="btn" onclick="openPinSetup()" title="PIN settings">🔒</button>
-    <button class="btn btn-green" onclick="openIcsModal()">📅 Apple Cal</button>
-    <button class="btn" onclick="exportJSON()">⬇ Backup</button>
-    <button class="btn" onclick="importJSON()">⬆ Restore</button>
-    <button class="btn" onclick="resetSchedule()">↺ Reset</button>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="theme-toggle-btn"><span id="theme-icon">âï¸</span></button>
+    <button class="btn" onclick="openPinSetup()" title="PIN settings">ð</button>
+    <button class="btn btn-green" onclick="openIcsModal()">ð Apple Cal</button>
+    <button class="btn" onclick="exportJSON()">â¬ Backup</button>
+    <button class="btn" onclick="importJSON()">â¬ Restore</button>
+    <button class="btn" onclick="resetSchedule()">âº Reset</button>
   </div>
 </nav>
 
@@ -334,12 +343,13 @@ body{transition:background 0.25s,color 0.25s;}
       </div>
     </div>
     <div class="day-nav">
-      <button class="day-nav-arrow" onclick="shiftDay(-1)">← Prev</button>
+      <button class="day-nav-arrow" onclick="shiftDay(-1)">â Prev</button>
       <button class="day-nav-arrow" onclick="goToToday()">Today</button>
-      <button class="day-nav-arrow" onclick="shiftDay(1)">Next →</button>
+      <button class="day-nav-arrow" onclick="shiftDay(1)">Next â</button>
     </div>
   </div>
   <div class="day-picker" id="day-picker-day"></div>
+  <div class="conflict-banner" id="conflict-banner-day"></div>
   <div id="day-card-full" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;max-width:700px;"></div>
 </div>
 
@@ -373,11 +383,11 @@ body{transition:background 0.25s,color 0.25s;}
   <div class="modal">
     <h2 id="modal-title">Edit Task</h2>
     <div class="field"><label>Description</label><textarea id="f-label" rows="2"></textarea></div>
-    <div class="field"><label>Note <span style="color:var(--muted);font-size:0.75em">(optional)</span></label><textarea id="f-note" rows="2" placeholder="e.g. bring lunch, remember charger…"></textarea></div>
+    <div class="field"><label>Note <span style="color:var(--muted);font-size:0.75em">(optional)</span></label><textarea id="f-note" rows="2" placeholder="e.g. bring lunch, remember chargerâ¦"></textarea></div>
     <div class="row-2">
-      <div class="field"><label>Time</label><input type="text" id="f-time" placeholder="e.g. 6:10 AM"></div>
+      <div class="field"><label>Time</label><input type="text" id="f-time" placeholder="e.g. 6:10 AM" oninput="checkModalConflict()" onchange="checkModalConflict()"></div>
       <div class="field"><label>Day</label>
-        <select id="f-day"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select>
+        <select id="f-day" onchange="checkModalConflict()"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select>
       </div>
     </div>
     <div class="row-2">
@@ -394,12 +404,13 @@ body{transition:background 0.25s,color 0.25s;}
         </select>
       </div>
       <div class="field"><label>Who</label>
-        <select id="f-who"><option value="">Both</option><option value="S">Szymon</option><option value="J">Jarret</option></select>
+        <select id="f-who" onchange="checkModalConflict()"><option value="">Both</option><option value="S">Szymon</option><option value="J">Jarret</option></select>
       </div>
     </div>
     <div class="field"><label>Section</label><input type="text" id="f-section" placeholder="e.g. Morning, Evening"></div>
+    <div class="modal-conflict" id="modal-conflict-msg"></div>
     <div class="modal-actions">
-      <button class="btn btn-danger" id="del-btn" onclick="deleteTask()" style="display:none;margin-right:auto">✕ Delete</button>
+      <button class="btn btn-danger" id="del-btn" onclick="deleteTask()" style="display:none;margin-right:auto">â Delete</button>
       <button class="btn" onclick="closeModal('task-modal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveTask()">Save</button>
     </div>
@@ -409,18 +420,18 @@ body{transition:background 0.25s,color 0.25s;}
 <!-- ICS MODAL -->
 <div class="overlay" id="ics-modal">
   <div class="modal">
-    <h2>📅 Export to Apple Calendar</h2>
+    <h2>ð Export to Apple Calendar</h2>
     <p style="color:var(--muted);font-size:0.84rem;margin-bottom:14px">All events repeat every week. Choose what to export:</p>
-    <div class="ics-option" onclick="exportIcs('both')"><h4>📆 Full Schedule — Both of Us</h4><p>All tasks, every day</p></div>
-    <div class="ics-option" onclick="exportIcs('S')"><h4>🔵 Szymon's Schedule Only</h4><p>Szymon tasks + shared events</p></div>
-    <div class="ics-option" onclick="exportIcs('J')"><h4>🟢 Jarret's Schedule Only</h4><p>Jarret tasks + shared events</p></div>
+    <div class="ics-option" onclick="exportIcs('both')"><h4>ð Full Schedule â Both of Us</h4><p>All tasks, every day</p></div>
+    <div class="ics-option" onclick="exportIcs('S')"><h4>ðµ Szymon's Schedule Only</h4><p>Szymon tasks + shared events</p></div>
+    <div class="ics-option" onclick="exportIcs('J')"><h4>ð¢ Jarret's Schedule Only</h4><p>Jarret tasks + shared events</p></div>
     <div class="info-box">
       <strong>How to import:</strong><br>
-      1. Download the .ics file → open it in Finder<br>
+      1. Download the .ics file â open it in Finder<br>
       2. Apple Calendar opens automatically<br>
       3. Choose a calendar and confirm<br>
-      4. Events repeat weekly forever 🎉<br><br>
-      <strong>For Jarret:</strong> AirDrop or iMessage him his .ics — imports directly.
+      4. Events repeat weekly forever ð<br><br>
+      <strong>For Jarret:</strong> AirDrop or iMessage him his .ics â imports directly.
     </div>
     <div class="modal-actions"><button class="btn" onclick="closeModal('ics-modal')">Close</button></div>
   </div>
@@ -430,16 +441,16 @@ body{transition:background 0.25s,color 0.25s;}
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav" id="bottom-nav">
   <button class="bn-tab" id="bn-day" onclick="showView('day')">
-    <span class="bn-icon">☀️</span>Day
+    <span class="bn-icon">âï¸</span>Day
   </button>
   <button class="bn-tab active" id="bn-week" onclick="showView('week')">
-    <span class="bn-icon">📋</span>Week
+    <span class="bn-icon">ð</span>Week
   </button>
   <button class="bn-tab" id="bn-calendar" onclick="showView('calendar')">
-    <span class="bn-icon">📆</span>Cal
+    <span class="bn-icon">ð</span>Cal
   </button>
   <button class="bn-tab" id="bn-stats" onclick="showView('stats')">
-    <span class="bn-icon">📊</span>Stats
+    <span class="bn-icon">ð</span>Stats
   </button>
 </nav>
 
@@ -469,7 +480,7 @@ body{transition:background 0.25s,color 0.25s;}
     <button class="pin-key" onclick="pinKey('9')">9</button>
     <button class="pin-key pin-empty"></button>
     <button class="pin-key" onclick="pinKey('0')">0</button>
-    <button class="pin-key pin-del" onclick="pinBackspace()">⌫</button>
+    <button class="pin-key pin-del" onclick="pinBackspace()">â«</button>
   </div>
   <button class="pin-setup-link-btn" onclick="openPinSetup()">Set up / change PIN</button>
 </div>
@@ -477,7 +488,7 @@ body{transition:background 0.25s,color 0.25s;}
 <!-- PIN SETUP MODAL -->
 <div class="overlay" id="pin-setup-modal">
   <div class="modal" style="max-width:360px;text-align:center;">
-    <h2>🔒 PIN Setup</h2>
+    <h2>ð PIN Setup</h2>
     <div id="pin-setup-step1" class="pin-setup-step active">
       <p style="color:var(--muted);font-size:0.84rem;margin-bottom:14px">Choose a 4-digit PIN to protect your schedule.</p>
       <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px">
@@ -488,7 +499,7 @@ body{transition:background 0.25s,color 0.25s;}
         <button class="pin-key" onclick="setupKey('1')">1</button><button class="pin-key" onclick="setupKey('2')">2</button><button class="pin-key" onclick="setupKey('3')">3</button>
         <button class="pin-key" onclick="setupKey('4')">4</button><button class="pin-key" onclick="setupKey('5')">5</button><button class="pin-key" onclick="setupKey('6')">6</button>
         <button class="pin-key" onclick="setupKey('7')">7</button><button class="pin-key" onclick="setupKey('8')">8</button><button class="pin-key" onclick="setupKey('9')">9</button>
-        <button class="pin-key pin-empty"></button><button class="pin-key" onclick="setupKey('0')">0</button><button class="pin-key pin-del" onclick="setupBackspace()">⌫</button>
+        <button class="pin-key pin-empty"></button><button class="pin-key" onclick="setupKey('0')">0</button><button class="pin-key pin-del" onclick="setupBackspace()">â«</button>
       </div>
     </div>
     <div id="pin-setup-step2" class="pin-setup-step">
@@ -502,7 +513,7 @@ body{transition:background 0.25s,color 0.25s;}
         <button class="pin-key" onclick="confirmKey('1')">1</button><button class="pin-key" onclick="confirmKey('2')">2</button><button class="pin-key" onclick="confirmKey('3')">3</button>
         <button class="pin-key" onclick="confirmKey('4')">4</button><button class="pin-key" onclick="confirmKey('5')">5</button><button class="pin-key" onclick="confirmKey('6')">6</button>
         <button class="pin-key" onclick="confirmKey('7')">7</button><button class="pin-key" onclick="confirmKey('8')">8</button><button class="pin-key" onclick="confirmKey('9')">9</button>
-        <button class="pin-key pin-empty"></button><button class="pin-key" onclick="confirmKey('0')">0</button><button class="pin-key pin-del" onclick="confirmBackspace()">⌫</button>
+        <button class="pin-key pin-empty"></button><button class="pin-key" onclick="confirmKey('0')">0</button><button class="pin-key pin-del" onclick="confirmBackspace()">â«</button>
       </div>
     </div>
     <div class="modal-actions" style="justify-content:center;flex-wrap:wrap;gap:8px;">
@@ -516,7 +527,7 @@ body{transition:background 0.25s,color 0.25s;}
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+// âââ CONSTANTS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const CATS={
   'cat-s':{label:'Szymon',color:'#5B9BD5'},
@@ -534,13 +545,13 @@ const CATS={
   'cat-notes':{label:'Session Notes',color:'#C8A8E8'},
 };
 
-// ─── PAYDAY LOGIC ─────────────────────────────────────────────────────────────
+// âââ PAYDAY LOGIC âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // Szymon: every other Wednesday. Confirmed paid March 11 (Tuesday night/Wed morning)
 // Jarret Kaleidoscope: weekly Tuesday nights
 // Jarret Greenridge: bi-weekly Thursday, opposite weeks to Szymon
-// Szymon ref date: Mar 12, 2025 (Wednesday) — every 14 days
+// Szymon ref date: Mar 12, 2025 (Wednesday) â every 14 days
 const SZYMON_PAY_REF = new Date('2025-03-12'); // Mar 12 next payday reference
-const JARRET_GREEN_PAY_REF = new Date('2025-03-06'); // opposite weeks → Mar 6 Thursday
+const JARRET_GREEN_PAY_REF = new Date('2025-03-06'); // opposite weeks â Mar 6 Thursday
 
 function getWeekStart(date) {
   const d = new Date(date);
@@ -563,15 +574,15 @@ function isPayWeek(refDate, periodDays, targetMonday) {
 // Returns payday info for a given week (Monday as anchor)
 function getPaydaysForWeek(monday) {
   const paydays = [];
-  // Szymon — Wednesday of week, bi-weekly
+  // Szymon â Wednesday of week, bi-weekly
   if (isPayWeek(getWeekStart(SZYMON_PAY_REF), 14, monday)) {
-    paydays.push({who:'S', day:'Wednesday', label:'💵 Szymon payday (Best Buy)'});
+    paydays.push({who:'S', day:'Wednesday', label:'ðµ Szymon payday (Best Buy)'});
   }
-  // Jarret Kaleidoscope — every Tuesday
-  paydays.push({who:'J', day:'Tuesday', label:'💚 Jarret payday (Kaleidoscope)'});
-  // Jarret Greenridge — bi-weekly Thursday, opposite to Szymon
+  // Jarret Kaleidoscope â every Tuesday
+  paydays.push({who:'J', day:'Tuesday', label:'ð Jarret payday (Kaleidoscope)'});
+  // Jarret Greenridge â bi-weekly Thursday, opposite to Szymon
   if (!isPayWeek(getWeekStart(SZYMON_PAY_REF), 14, monday)) {
-    paydays.push({who:'J', day:'Thursday', label:'💚 Jarret payday (Greenridge)'});
+    paydays.push({who:'J', day:'Thursday', label:'ð Jarret payday (Greenridge)'});
   }
   return paydays;
 }
@@ -580,59 +591,59 @@ function getTodayMonday() {
   return getWeekStart(new Date());
 }
 
-// ─── DEFAULT SCHEDULE ─────────────────────────────────────────────────────────
+// âââ DEFAULT SCHEDULE âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const DEFAULT = {
   Monday:{tags:['Both Workout AM'],sections:[
     {label:'Wake + Morning Workout',tasks:[
-      {time:'5:45 AM',label:'Wake up — both',cat:'cat-sleep',who:''},
+      {time:'5:45 AM',label:'Wake up â both',cat:'cat-sleep',who:''},
       {time:'5:55 AM',label:'Pre-workout snack',cat:'cat-food',who:''},
-      {time:'6:10 AM',label:'Workout together — 25 min ✦',cat:'cat-workout',who:''},
+      {time:'6:10 AM',label:'Workout together â 25 min â¦',cat:'cat-workout',who:''},
       {time:'6:35 AM',label:'Shower + get ready',cat:'cat-sleep',who:''},
       {time:'7:10 AM',label:'Breakfast together',cat:'cat-food',who:''},
-      {time:'7:20 AM',label:'Jarret — review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
+      {time:'7:20 AM',label:'Jarret â review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
     ]},
     {label:'Commute + Work',tasks:[
-      {time:'7:40 AM',label:'Jarret departs → Kaleidoscope (~15 min)',cat:'cat-travel',who:'J'},
-      {time:'8:00 AM',label:'Jarret — Kaleidoscope ABA',cat:'cat-j',who:'J'},
-      {time:'8:35 AM',label:'Szymon departs → Best Buy (~20 min)',cat:'cat-travel',who:'S'},
-      {time:'9:00 AM',label:'Szymon — Best Buy 898',cat:'cat-s',who:'S'},
-      {time:'4:30 PM',label:'Jarret off — Kaleidoscope',cat:'cat-j',who:'J'},
-      {time:'5:00 PM',label:'Szymon off — Best Buy',cat:'cat-s',who:'S'},
+      {time:'7:40 AM',label:'Jarret departs â Kaleidoscope (~15 min)',cat:'cat-travel',who:'J'},
+      {time:'8:00 AM',label:'Jarret â Kaleidoscope ABA',cat:'cat-j',who:'J'},
+      {time:'8:35 AM',label:'Szymon departs â Best Buy (~20 min)',cat:'cat-travel',who:'S'},
+      {time:'9:00 AM',label:'Szymon â Best Buy 898',cat:'cat-s',who:'S'},
+      {time:'4:30 PM',label:'Jarret off â Kaleidoscope',cat:'cat-j',who:'J'},
+      {time:'5:00 PM',label:'Szymon off â Best Buy',cat:'cat-s',who:'S'},
     ]},
-    {label:'Evening — Therapy Day',tasks:[
-      {time:'5:30 PM',label:'Jarret — personal therapy (5:30–6:30 PM)',cat:'cat-therapy',who:'J'},
+    {label:'Evening â Therapy Day',tasks:[
+      {time:'5:30 PM',label:'Jarret â personal therapy (5:30â6:30 PM)',cat:'cat-therapy',who:'J'},
       {time:'5:30 PM',label:'Szymon cooks dinner (ready for 6:30)',cat:'cat-food',who:'S'},
       {time:'6:45 PM',label:'Dinner together',cat:'cat-shared',who:''},
-      {time:'7:30 PM',label:'Szymon — quick tidy of shared spaces',cat:'cat-clean',who:'S'},
-      {time:'8:00 PM',label:'Wind-down — walk, TV, or reading',cat:'cat-shared',who:''},
+      {time:'7:30 PM',label:'Szymon â quick tidy of shared spaces',cat:'cat-clean',who:'S'},
+      {time:'8:00 PM',label:'Wind-down â walk, TV, or reading',cat:'cat-shared',who:''},
     ]},
     {label:'Sleep',tasks:[
-      {time:'9:45 PM',label:'Screens off — in bed by 10:00 PM',cat:'cat-sleep',who:''},
+      {time:'9:45 PM',label:'Screens off â in bed by 10:00 PM',cat:'cat-sleep',who:''},
     ]},
   ]},
   Tuesday:{tags:['Both Workout AM'],sections:[
     {label:'Wake + Morning Workout',tasks:[
-      {time:'5:45 AM',label:'Wake up — both',cat:'cat-sleep',who:''},
+      {time:'5:45 AM',label:'Wake up â both',cat:'cat-sleep',who:''},
       {time:'5:55 AM',label:'Pre-workout snack',cat:'cat-food',who:''},
-      {time:'6:10 AM',label:'Workout together — 25 min ✦',cat:'cat-workout',who:''},
+      {time:'6:10 AM',label:'Workout together â 25 min â¦',cat:'cat-workout',who:''},
       {time:'6:35 AM',label:'Shower + get ready',cat:'cat-sleep',who:''},
       {time:'7:10 AM',label:'Breakfast together',cat:'cat-food',who:''},
-      {time:'7:20 AM',label:'Jarret — review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
+      {time:'7:20 AM',label:'Jarret â review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
     ]},
     {label:'Commute + Work',tasks:[
-      {time:'7:40 AM',label:'Jarret departs → Kaleidoscope (~15 min)',cat:'cat-travel',who:'J'},
-      {time:'8:00 AM',label:'Jarret — Kaleidoscope ABA',cat:'cat-j',who:'J'},
-      {time:'11:15 AM',label:'Szymon — lunch before leaving',cat:'cat-food',who:'S'},
-      {time:'11:35 AM',label:'Szymon departs → Best Buy (~20 min)',cat:'cat-travel',who:'S'},
-      {time:'12:00 PM',label:'Szymon — Best Buy 898',cat:'cat-s',who:'S'},
+      {time:'7:40 AM',label:'Jarret departs â Kaleidoscope (~15 min)',cat:'cat-travel',who:'J'},
+      {time:'8:00 AM',label:'Jarret â Kaleidoscope ABA',cat:'cat-j',who:'J'},
+      {time:'11:15 AM',label:'Szymon â lunch before leaving',cat:'cat-food',who:'S'},
+      {time:'11:35 AM',label:'Szymon departs â Best Buy (~20 min)',cat:'cat-travel',who:'S'},
+      {time:'12:00 PM',label:'Szymon â Best Buy 898',cat:'cat-s',who:'S'},
     ]},
     {label:'Afternoon / Evening',tasks:[
-      {time:'4:30 PM',label:'Jarret off — drives directly to Greenridge',cat:'cat-j',who:'J'},
-      {time:'4:45 PM',label:'Jarret — eats packed meal prep in car',cat:'cat-food',who:'J'},
-      {time:'5:00 PM',label:'Jarret — Greenridge Counseling (5–8 PM, back-to-back)',cat:'cat-j',who:'J'},
-      {time:'~6:00 PM',label:'Szymon — dinner on break at work (before 7 PM)',cat:'cat-food',who:'S'},
-      {time:'8:00 PM',label:'Jarret off — Greenridge, drives home',cat:'cat-j',who:'J'},
-      {time:'8:30 PM',label:'Szymon off — Best Buy',cat:'cat-s',who:'S'},
+      {time:'4:30 PM',label:'Jarret off â drives directly to Greenridge',cat:'cat-j',who:'J'},
+      {time:'4:45 PM',label:'Jarret â eats packed meal prep in car',cat:'cat-food',who:'J'},
+      {time:'5:00 PM',label:'Jarret â Greenridge Counseling (5â8 PM, back-to-back)',cat:'cat-j',who:'J'},
+      {time:'~6:00 PM',label:'Szymon â dinner on break at work (before 7 PM)',cat:'cat-food',who:'S'},
+      {time:'8:00 PM',label:'Jarret off â Greenridge, drives home',cat:'cat-j',who:'J'},
+      {time:'8:30 PM',label:'Szymon off â Best Buy',cat:'cat-s',who:'S'},
     ]},
     {label:'Sleep',tasks:[
       {time:'10:15 PM',label:'Wind-down, in bed by 10:45 PM',cat:'cat-sleep',who:''},
@@ -640,28 +651,28 @@ const DEFAULT = {
   ]},
   Wednesday:{tags:['Both Workout AM'],sections:[
     {label:'Wake + Morning Workout',tasks:[
-      {time:'5:45 AM',label:'Wake up — both',cat:'cat-sleep',who:''},
+      {time:'5:45 AM',label:'Wake up â both',cat:'cat-sleep',who:''},
       {time:'5:55 AM',label:'Pre-workout snack',cat:'cat-food',who:''},
-      {time:'6:10 AM',label:'Workout together — 25 min ✦',cat:'cat-workout',who:''},
+      {time:'6:10 AM',label:'Workout together â 25 min â¦',cat:'cat-workout',who:''},
       {time:'6:35 AM',label:'Shower + get ready',cat:'cat-sleep',who:''},
       {time:'7:10 AM',label:'Breakfast together',cat:'cat-food',who:''},
-      {time:'7:20 AM',label:'Jarret — review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
+      {time:'7:20 AM',label:'Jarret â review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
     ]},
     {label:'Commute + Work',tasks:[
-      {time:'7:40 AM',label:'Jarret departs → Kaleidoscope (~15 min)',cat:'cat-travel',who:'J'},
-      {time:'8:00 AM',label:'Jarret — Kaleidoscope ABA',cat:'cat-j',who:'J'},
-      {time:'11:15 AM',label:'Szymon — lunch before leaving',cat:'cat-food',who:'S'},
-      {time:'11:35 AM',label:'Szymon departs → Best Buy (~20 min)',cat:'cat-travel',who:'S'},
-      {time:'12:00 PM',label:'Szymon — Best Buy 898',cat:'cat-s',who:'S'},
+      {time:'7:40 AM',label:'Jarret departs â Kaleidoscope (~15 min)',cat:'cat-travel',who:'J'},
+      {time:'8:00 AM',label:'Jarret â Kaleidoscope ABA',cat:'cat-j',who:'J'},
+      {time:'11:15 AM',label:'Szymon â lunch before leaving',cat:'cat-food',who:'S'},
+      {time:'11:35 AM',label:'Szymon departs â Best Buy (~20 min)',cat:'cat-travel',who:'S'},
+      {time:'12:00 PM',label:'Szymon â Best Buy 898',cat:'cat-s',who:'S'},
     ]},
     {label:'Afternoon / Evening',tasks:[
-      {time:'4:30 PM',label:'Jarret off — drives directly to Greenridge',cat:'cat-j',who:'J'},
-      {time:'4:45 PM',label:'Jarret — eats packed meal prep in car',cat:'cat-food',who:'J'},
-      {time:'5:00 PM',label:'Jarret — Greenridge Counseling (5–8 PM, back-to-back)',cat:'cat-j',who:'J'},
-      {time:'~6:00 PM',label:'Szymon — dinner on break at work (before 7 PM)',cat:'cat-food',who:'S'},
-      {time:'8:00 PM',label:'Jarret off — Greenridge, drives home',cat:'cat-j',who:'J'},
-      {time:'8:30 PM',label:'Szymon off — Best Buy',cat:'cat-s',who:'S'},
-      {time:'9:15 PM',label:'Bills check — quick review on payday weeks 💳',cat:'cat-bills',who:''},
+      {time:'4:30 PM',label:'Jarret off â drives directly to Greenridge',cat:'cat-j',who:'J'},
+      {time:'4:45 PM',label:'Jarret â eats packed meal prep in car',cat:'cat-food',who:'J'},
+      {time:'5:00 PM',label:'Jarret â Greenridge Counseling (5â8 PM, back-to-back)',cat:'cat-j',who:'J'},
+      {time:'~6:00 PM',label:'Szymon â dinner on break at work (before 7 PM)',cat:'cat-food',who:'S'},
+      {time:'8:00 PM',label:'Jarret off â Greenridge, drives home',cat:'cat-j',who:'J'},
+      {time:'8:30 PM',label:'Szymon off â Best Buy',cat:'cat-s',who:'S'},
+      {time:'9:15 PM',label:'Bills check â quick review on payday weeks ð³',cat:'cat-bills',who:''},
     ]},
     {label:'Sleep',tasks:[
       {time:'10:15 PM',label:'Wind-down, in bed by 10:45 PM',cat:'cat-sleep',who:''},
@@ -669,30 +680,30 @@ const DEFAULT = {
   ]},
   Thursday:{tags:['Szymon Off'],sections:[
     {label:'Wake + Morning Workout',tasks:[
-      {time:'5:45 AM',label:'Wake up — both',cat:'cat-sleep',who:''},
+      {time:'5:45 AM',label:'Wake up â both',cat:'cat-sleep',who:''},
       {time:'5:55 AM',label:'Pre-workout snack',cat:'cat-food',who:''},
-      {time:'6:10 AM',label:'Szymon — workout solo, 25 min ✦',cat:'cat-workout',who:'S'},
+      {time:'6:10 AM',label:'Szymon â workout solo, 25 min â¦',cat:'cat-workout',who:'S'},
       {time:'6:35 AM',label:'Shower + get ready',cat:'cat-sleep',who:''},
       {time:'7:10 AM',label:'Breakfast together before Jarret leaves',cat:'cat-food',who:''},
-      {time:'7:20 AM',label:'Jarret — review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
+      {time:'7:20 AM',label:'Jarret â review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
     ]},
     {label:'Commute + Work',tasks:[
-      {time:'7:40 AM',label:'Jarret departs → Kaleidoscope (~15 min)',cat:'cat-travel',who:'J'},
-      {time:'8:00 AM',label:'Jarret — Kaleidoscope ABA',cat:'cat-j',who:'J'},
+      {time:'7:40 AM',label:'Jarret departs â Kaleidoscope (~15 min)',cat:'cat-travel',who:'J'},
+      {time:'8:00 AM',label:'Jarret â Kaleidoscope ABA',cat:'cat-j',who:'J'},
     ]},
     {label:"Szymon's Off Day",tasks:[
-      {time:'8:00 AM',label:'App development — Transform 75 / iOS work',cat:'cat-appdev',who:'S'},
-      {time:'12:00 PM',label:'Szymon — real lunch',cat:'cat-food',who:'S'},
+      {time:'8:00 AM',label:'App development â Transform 75 / iOS work',cat:'cat-appdev',who:'S'},
+      {time:'12:00 PM',label:'Szymon â real lunch',cat:'cat-food',who:'S'},
       {time:'12:30 PM',label:'Client web design work',cat:'cat-appdev',who:'S'},
       {time:'2:30 PM',label:'Homework / coursework',cat:'cat-hw',who:'S'},
-      {time:'4:00 PM',label:'Deep clean — bathrooms, kitchen',cat:'cat-clean',who:'S'},
+      {time:'4:00 PM',label:'Deep clean â bathrooms, kitchen',cat:'cat-clean',who:'S'},
     ]},
     {label:'Evening',tasks:[
-      {time:'4:30 PM',label:'Jarret off — drives directly to Greenridge',cat:'cat-j',who:'J'},
-      {time:'4:45 PM',label:'Jarret — eats packed meal prep in car',cat:'cat-food',who:'J'},
-      {time:'5:00 PM',label:'Jarret — Greenridge Counseling (5–8 PM, back-to-back)',cat:'cat-j',who:'J'},
-      {time:'5:30 PM',label:'Jarret — writes session notes (during/after sessions)',cat:'cat-notes',who:'J'},
-      {time:'6:00 PM',label:'Szymon — dinner (before 7 PM)',cat:'cat-food',who:'S'},
+      {time:'4:30 PM',label:'Jarret off â drives directly to Greenridge',cat:'cat-j',who:'J'},
+      {time:'4:45 PM',label:'Jarret â eats packed meal prep in car',cat:'cat-food',who:'J'},
+      {time:'5:00 PM',label:'Jarret â Greenridge Counseling (5â8 PM, back-to-back)',cat:'cat-j',who:'J'},
+      {time:'5:30 PM',label:'Jarret â writes session notes (during/after sessions)',cat:'cat-notes',who:'J'},
+      {time:'6:00 PM',label:'Szymon â dinner (before 7 PM)',cat:'cat-food',who:'S'},
       {time:'8:00 PM',label:'Jarret home from Greenridge',cat:'cat-j',who:'J'},
       {time:'8:30 PM',label:'Wind-down together',cat:'cat-shared',who:''},
     ]},
@@ -702,32 +713,32 @@ const DEFAULT = {
   ]},
   Friday:{tags:['Szymon Off','Jarret Work'],sections:[
     {label:'Wake + Morning Workout',tasks:[
-      {time:'5:45 AM',label:'Wake up — both',cat:'cat-sleep',who:''},
+      {time:'5:45 AM',label:'Wake up â both',cat:'cat-sleep',who:''},
       {time:'5:55 AM',label:'Pre-workout snack',cat:'cat-food',who:''},
-      {time:'6:10 AM',label:'Workout together — 25 min ✦',cat:'cat-workout',who:''},
+      {time:'6:10 AM',label:'Workout together â 25 min â¦',cat:'cat-workout',who:''},
       {time:'6:35 AM',label:'Shower + get ready',cat:'cat-sleep',who:''},
       {time:'7:10 AM',label:'Breakfast together before Jarret leaves',cat:'cat-food',who:''},
-      {time:'7:20 AM',label:'Jarret — review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
+      {time:'7:20 AM',label:'Jarret â review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
     ]},
     {label:'Commute + Work',tasks:[
-      {time:'7:40 AM',label:'Jarret departs → Kaleidoscope (~15 min)',cat:'cat-travel',who:'J'},
-      {time:'8:00 AM',label:'Jarret — Kaleidoscope ABA',cat:'cat-j',who:'J'},
+      {time:'7:40 AM',label:'Jarret departs â Kaleidoscope (~15 min)',cat:'cat-travel',who:'J'},
+      {time:'8:00 AM',label:'Jarret â Kaleidoscope ABA',cat:'cat-j',who:'J'},
     ]},
-    {label:"Szymon's Off Day — Deep Work",tasks:[
-      {time:'8:30 AM',label:'App development — Transform 75 / iOS work',cat:'cat-appdev',who:'S'},
-      {time:'12:00 PM',label:'Szymon — real lunch',cat:'cat-food',who:'S'},
+    {label:"Szymon's Off Day â Deep Work",tasks:[
+      {time:'8:30 AM',label:'App development â Transform 75 / iOS work',cat:'cat-appdev',who:'S'},
+      {time:'12:00 PM',label:'Szymon â real lunch',cat:'cat-food',who:'S'},
       {time:'12:30 PM',label:'Client web design work',cat:'cat-appdev',who:'S'},
-      {time:'2:00 PM',label:'Szymon — write any session notes catch-up if needed',cat:'cat-notes',who:'S'},
-      {time:'3:00 PM',label:'Grocery run — Szymon solo (before Jarret gets home)',cat:'cat-shared',who:'S'},
+      {time:'2:00 PM',label:'Szymon â write any session notes catch-up if needed',cat:'cat-notes',who:'S'},
+      {time:'3:00 PM',label:'Grocery run â Szymon solo (before Jarret gets home)',cat:'cat-shared',who:'S'},
     ]},
-    {label:'Afternoon — Jarret Off + Errands',tasks:[
-      {time:'4:30 PM',label:'Jarret off — Kaleidoscope, drives home',cat:'cat-j',who:'J'},
-      {time:'5:00 PM',label:'Jarret — writes session notes from the week',cat:'cat-notes',who:'J'},
-      {time:'5:00 PM',label:'Szymon — laundry + vacuum living spaces',cat:'cat-clean',who:'S'},
-      {time:'5:30 PM',label:'Jarret — batch cook + pack Greenridge car meals',cat:'cat-food',who:'J'},
+    {label:'Afternoon â Jarret Off + Errands',tasks:[
+      {time:'4:30 PM',label:'Jarret off â Kaleidoscope, drives home',cat:'cat-j',who:'J'},
+      {time:'5:00 PM',label:'Jarret â writes session notes from the week',cat:'cat-notes',who:'J'},
+      {time:'5:00 PM',label:'Szymon â laundry + vacuum living spaces',cat:'cat-clean',who:'S'},
+      {time:'5:30 PM',label:'Jarret â batch cook + pack Greenridge car meals',cat:'cat-food',who:'J'},
     ]},
     {label:'Evening',tasks:[
-      {time:'6:30 PM',label:'Date night dinner — cook or go out',cat:'cat-shared',who:''},
+      {time:'6:30 PM',label:'Date night dinner â cook or go out',cat:'cat-shared',who:''},
       {time:'8:00 PM',label:'Intentional wind-down',cat:'cat-shared',who:''},
     ]},
     {label:'Sleep',tasks:[
@@ -737,27 +748,27 @@ const DEFAULT = {
   Saturday:{tags:['Szymon Evening Shift','Jarret Off'],sections:[
     {label:'Wake + Morning Workout',tasks:[
       {time:'7:15 AM',label:'Szymon wakes up',cat:'cat-sleep',who:'S'},
-      {time:'7:25 AM',label:'Szymon — pre-workout snack',cat:'cat-food',who:'S'},
-      {time:'7:40 AM',label:'Szymon — workout solo, 25 min ✦',cat:'cat-workout',who:'S'},
-      {time:'8:05 AM',label:'Szymon — shower + get ready',cat:'cat-sleep',who:'S'},
+      {time:'7:25 AM',label:'Szymon â pre-workout snack',cat:'cat-food',who:'S'},
+      {time:'7:40 AM',label:'Szymon â workout solo, 25 min â¦',cat:'cat-workout',who:'S'},
+      {time:'8:05 AM',label:'Szymon â shower + get ready',cat:'cat-sleep',who:'S'},
       {time:'9:00 AM',label:'Breakfast together once Jarret is up',cat:'cat-food',who:''},
-      {time:'9:15 AM',label:'Jarret — review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
+      {time:'9:15 AM',label:'Jarret â review & adjust Kaleidoscope schedule',cat:'cat-j',who:'J'},
     ]},
-    {label:'Morning — Jarret Off Day',tasks:[
-      {time:'9:30 AM',label:'Jarret — writes session notes (catch-up)',cat:'cat-notes',who:'J'},
-      {time:'10:30 AM',label:'Grocery run — whoever is available (or Jarret solo)',cat:'cat-shared',who:''},
-      {time:'11:30 AM',label:'Jarret — workout solo ✦',cat:'cat-workout',who:'J'},
+    {label:'Morning â Jarret Off Day',tasks:[
+      {time:'9:30 AM',label:'Jarret â writes session notes (catch-up)',cat:'cat-notes',who:'J'},
+      {time:'10:30 AM',label:'Grocery run â whoever is available (or Jarret solo)',cat:'cat-shared',who:''},
+      {time:'11:30 AM',label:'Jarret â workout solo â¦',cat:'cat-workout',who:'J'},
     ]},
     {label:'Afternoon',tasks:[
-      {time:'12:00 PM',label:'Szymon — substantial lunch before shift',cat:'cat-food',who:'S'},
-      {time:'12:35 PM',label:'Szymon departs → Best Buy (~20 min)',cat:'cat-travel',who:'S'},
-      {time:'1:00 PM',label:'Szymon — Best Buy 898',cat:'cat-s',who:'S'},
-      {time:'1:00 PM',label:'Jarret — errands, deep cleaning, or relaxing',cat:'cat-clean',who:'J'},
-      {time:'~6:00 PM',label:'Szymon — dinner on break (before 7 PM)',cat:'cat-food',who:'S'},
-      {time:'6:00 PM',label:'Jarret — dinner (don\'t wait for Szymon)',cat:'cat-food',who:'J'},
+      {time:'12:00 PM',label:'Szymon â substantial lunch before shift',cat:'cat-food',who:'S'},
+      {time:'12:35 PM',label:'Szymon departs â Best Buy (~20 min)',cat:'cat-travel',who:'S'},
+      {time:'1:00 PM',label:'Szymon â Best Buy 898',cat:'cat-s',who:'S'},
+      {time:'1:00 PM',label:'Jarret â errands, deep cleaning, or relaxing',cat:'cat-clean',who:'J'},
+      {time:'~6:00 PM',label:'Szymon â dinner on break (before 7 PM)',cat:'cat-food',who:'S'},
+      {time:'6:00 PM',label:'Jarret â dinner (don\'t wait for Szymon)',cat:'cat-food',who:'J'},
     ]},
     {label:'Evening',tasks:[
-      {time:'9:00 PM',label:'Szymon off — Best Buy, drives home',cat:'cat-s',who:'S'},
+      {time:'9:00 PM',label:'Szymon off â Best Buy, drives home',cat:'cat-s',who:'S'},
       {time:'10:00 PM',label:'Low-key wind-down together',cat:'cat-shared',who:''},
     ]},
     {label:'Sleep',tasks:[
@@ -766,38 +777,38 @@ const DEFAULT = {
   ]},
   Sunday:{tags:['Both Workout AM','Weekly Reset','Jarret Off'],sections:[
     {label:'Wake + Morning Workout',tasks:[
-      {time:'6:15 AM',label:'Wake up — both',cat:'cat-sleep',who:''},
+      {time:'6:15 AM',label:'Wake up â both',cat:'cat-sleep',who:''},
       {time:'6:25 AM',label:'Pre-workout snack',cat:'cat-food',who:''},
-      {time:'6:40 AM',label:'Workout together — 25 min ✦',cat:'cat-workout',who:''},
+      {time:'6:40 AM',label:'Workout together â 25 min â¦',cat:'cat-workout',who:''},
       {time:'7:05 AM',label:'Shower + get ready',cat:'cat-sleep',who:''},
       {time:'7:40 AM',label:'Breakfast before Szymon leaves',cat:'cat-food',who:''},
-      {time:'7:50 AM',label:'Jarret — review & adjust Kaleidoscope schedule for the week',cat:'cat-j',who:'J'},
+      {time:'7:50 AM',label:'Jarret â review & adjust Kaleidoscope schedule for the week',cat:'cat-j',who:'J'},
     ]},
     {label:'Commute + Work',tasks:[
-      {time:'8:35 AM',label:'Szymon departs → Best Buy (~20 min)',cat:'cat-travel',who:'S'},
-      {time:'9:00 AM',label:'Szymon — Best Buy 898',cat:'cat-s',who:'S'},
+      {time:'8:35 AM',label:'Szymon departs â Best Buy (~20 min)',cat:'cat-travel',who:'S'},
+      {time:'9:00 AM',label:'Szymon â Best Buy 898',cat:'cat-s',who:'S'},
     ]},
     {label:"Jarret's Off Morning",tasks:[
-      {time:'10:00 AM',label:'Jarret — brunch',cat:'cat-food',who:'J'},
-      {time:'10:30 AM',label:'Grocery run — Jarret picks up anything missing',cat:'cat-shared',who:'J'},
-      {time:'11:00 AM',label:'Jarret — meal prep for the week',cat:'cat-food',who:'J'},
-      {time:'1:00 PM',label:'Jarret — vacuum, clean bathroom, tidy',cat:'cat-clean',who:'J'},
+      {time:'10:00 AM',label:'Jarret â brunch',cat:'cat-food',who:'J'},
+      {time:'10:30 AM',label:'Grocery run â Jarret picks up anything missing',cat:'cat-shared',who:'J'},
+      {time:'11:00 AM',label:'Jarret â meal prep for the week',cat:'cat-food',who:'J'},
+      {time:'1:00 PM',label:'Jarret â vacuum, clean bathroom, tidy',cat:'cat-clean',who:'J'},
     ]},
-    {label:'Afternoon — Weekly Reset',tasks:[
-      {time:'4:00 PM',label:'Szymon off — Best Buy, drives home',cat:'cat-s',who:'S'},
-      {time:'4:30 PM',label:'Szymon — homework due today ⚠️',cat:'cat-hw',who:'S'},
-      {time:'5:30 PM',label:'Bills & finances review — pay anything due, check balances 💳',cat:'cat-bills',who:''},
-      {time:'6:00 PM',label:'Sunday dinner — cook together',cat:'cat-food',who:''},
+    {label:'Afternoon â Weekly Reset',tasks:[
+      {time:'4:00 PM',label:'Szymon off â Best Buy, drives home',cat:'cat-s',who:'S'},
+      {time:'4:30 PM',label:'Szymon â homework due today â ï¸',cat:'cat-hw',who:'S'},
+      {time:'5:30 PM',label:'Bills & finances review â pay anything due, check balances ð³',cat:'cat-bills',who:''},
+      {time:'6:00 PM',label:'Sunday dinner â cook together',cat:'cat-food',who:''},
       {time:'6:45 PM',label:'Weekly reset: plan the week, review meal prep',cat:'cat-shared',who:''},
-      {time:'8:00 PM',label:'Intentional wind-down — no screens after 9 PM',cat:'cat-shared',who:''},
+      {time:'8:00 PM',label:'Intentional wind-down â no screens after 9 PM',cat:'cat-shared',who:''},
     ]},
-    {label:'Sleep — Early for 5:45 AM Monday',tasks:[
-      {time:'9:30 PM',label:'Screens off — in bed by 9:45 PM',cat:'cat-sleep',who:''},
+    {label:'Sleep â Early for 5:45 AM Monday',tasks:[
+      {time:'9:30 PM',label:'Screens off â in bed by 9:45 PM',cat:'cat-sleep',who:''},
     ]},
   ]},
 };
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
+// âââ STATE ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let schedule = JSON.parse(localStorage.getItem('couple_schedule')||'null') || deepClone(DEFAULT);
 // checked: { 'WEEKKEY-day-si-ti': true }
 // WEEKKEY = ISO week string like "2026-W10"
@@ -813,7 +824,7 @@ let currentDay = todayDayName();
 
 function deepClone(o){return JSON.parse(JSON.stringify(o));}
 
-// ─── WEEK KEY ─────────────────────────────────────────────────────────────────
+// âââ WEEK KEY âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function getWeekKey(date) {
   const d = new Date(date||Date.now());
   const jan4 = new Date(d.getFullYear(),0,4);
@@ -822,7 +833,7 @@ function getWeekKey(date) {
 }
 const CUR_WEEK = getWeekKey();
 
-// ─── MULTI-WEEK / MONTH-OUT SCHEDULING ────────────────────────────────────────
+// âââ MULTI-WEEK / MONTH-OUT SCHEDULING ââââââââââââââââââââââââââââââââââââââââ
 let viewWeekOffset = 0; // 0=current week, 1=next week, up to 5 weeks out
 
 function getViewWeekMonday() {
@@ -876,12 +887,12 @@ function ensureDateSchedule(dayName) {
   return ds;
 }
 
-// Format week label e.g. "Mar 9 – Mar 15"
+// Format week label e.g. "Mar 9 â Mar 15"
 function formatWeekLabel(monday) {
   const sun = new Date(monday);
   sun.setDate(sun.getDate() + 6);
   const fmt = (d) => d.toLocaleDateString('en-US', {month:'short',day:'numeric'});
-  return fmt(monday) + ' – ' + fmt(sun);
+  return fmt(monday) + ' â ' + fmt(sun);
 }
 
 function taskKey(day, si, ti) { return `${getViewWeekKey()}-${day}-${si}-${ti}`; }
@@ -897,13 +908,13 @@ function toggleCheck(day, si, ti, el) {
   updateWeekCardProgress(day);
 }
 
-// ─── SERVER SYNC ──────────────────────────────────────────────────────────────
+// âââ SERVER SYNC ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async function detectServer() {
   try {
     const r = await fetch('/api/schedule',{signal:AbortSignal.timeout(900)});
     if (r.ok) {
       isServerMode = true;
-      setSyncStatus('synced','Synced ✓');
+      setSyncStatus('synced','Synced â');
       document.querySelectorAll('.server-banner').forEach(b=>b.classList.add('show'));
       const data = await r.json();
       if (data) {
@@ -931,10 +942,10 @@ function setSyncStatus(state,label) {
 }
 async function saveToServer() {
   if (!isServerMode) return;
-  setSyncStatus('syncing','Saving…');
+  setSyncStatus('syncing','Savingâ¦');
   try {
     await fetch('/api/schedule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...schedule, _dateSchedules: dateSchedules})});
-    setSyncStatus('synced','Synced ✓');
+    setSyncStatus('synced','Synced â');
   } catch { setSyncStatus('error','Sync failed'); }
 }
 async function saveCheckToServer() {
@@ -947,7 +958,7 @@ function save() {
   saveToServer();
 }
 
-// ─── PAYDAY DISPLAY ───────────────────────────────────────────────────────────
+// âââ PAYDAY DISPLAY âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderPaydayBanner(containerId) {
   const monday = getTodayMonday();
   const pays = getPaydaysForWeek(monday);
@@ -955,29 +966,29 @@ function renderPaydayBanner(containerId) {
   if (!pays.length) { el.classList.remove('show'); return; }
   const pills = pays.map(p => {
     const cls = p.who === 'S' ? 'pay-s' : 'pay-j';
-    return `<span class="pay-pill ${cls}">${p.label} — ${p.day}</span>`;
+    return `<span class="pay-pill ${cls}">${p.label} â ${p.day}</span>`;
   }).join('');
-  el.innerHTML = `<span>💰 This week's paydays:</span> ${pills}`;
+  el.innerHTML = `<span>ð° This week's paydays:</span> ${pills}`;
   el.classList.add('show');
 }
 
-// ─── WEEK NAVIGATION ──────────────────────────────────────────────────────────
+// âââ WEEK NAVIGATION ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderWeekNav(containerId) {
   const el = document.getElementById(containerId);
   if (!el) return;
   const mon = getViewWeekMonday();
   const label = formatWeekLabel(mon);
   const isCurrentWeek = viewWeekOffset === 0;
-  const weekTitle = isCurrentWeek ? '📅 This Week' : viewWeekOffset===1 ? '📅 Next Week' : '📅 +' + viewWeekOffset + ' Weeks';
+  const weekTitle = isCurrentWeek ? 'ð This Week' : viewWeekOffset===1 ? 'ð Next Week' : 'ð +' + viewWeekOffset + ' Weeks';
   const todayBtn = !isCurrentWeek ? '<button class="wk-nav-today-btn" onclick="goToCurrentWeek()">Today\'s Week</button>' : '';
   el.innerHTML = `
     <div class="week-nav-bar">
-      <button class="wk-nav-btn" onclick="shiftWeek(-1)" ${viewWeekOffset<=0?'disabled':''}>◀</button>
+      <button class="wk-nav-btn" onclick="shiftWeek(-1)" ${viewWeekOffset<=0?'disabled':''}>â</button>
       <span class="wk-nav-label">
         ${weekTitle}
         <span class="wk-nav-dates">${label}</span>
       </span>
-      <button class="wk-nav-btn" onclick="shiftWeek(1)" ${viewWeekOffset>=5?'disabled':''}>▶</button>
+      <button class="wk-nav-btn" onclick="shiftWeek(1)" ${viewWeekOffset>=5?'disabled':''}>â¶</button>
       ${todayBtn}
     </div>`;
 }
@@ -992,7 +1003,7 @@ function goToCurrentWeek() {
   renderCurrentView();
 }
 
-// ─── VIEWS ────────────────────────────────────────────────────────────────────
+// âââ VIEWS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let currentView = 'week';
 function showView(v) {
   currentView = v;
@@ -1012,7 +1023,7 @@ function renderCurrentView() {
   else if (currentView==='stats') renderStats();
 }
 
-// ─── DAY PICKER ───────────────────────────────────────────────────────────────
+// âââ DAY PICKER âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderDayPicker(containerId, activeFn, clickFn) {
   const today = todayDayName();
   const el = document.getElementById(containerId);
@@ -1030,7 +1041,7 @@ function renderDayPicker(containerId, activeFn, clickFn) {
     if (isActive) cls += ' active';
     if (isToday) cls += ' today';
     const checkIcon = done > 0 ? `<span class="dp-check">${done}/${total}</span>` : '';
-    const payIcon = isPay ? ' 💰' : '';
+    const payIcon = isPay ? ' ð°' : '';
     return `<button class="${cls}" onclick="${clickFn}('${d}')">${d.slice(0,3)} <span style="font-size:0.65rem;opacity:0.7">${dateLabel}</span>${payIcon} ${checkIcon}</button>`;
   }).join('');
 }
@@ -1044,7 +1055,7 @@ function getDayCheckedCount(day) {
   return n;
 }
 
-// ─── WEEK VIEW ────────────────────────────────────────────────────────────────
+// âââ WEEK VIEW ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderWeek() {
   renderPaydayBanner('payday-banner-week');
   renderWeekNav('week-nav');
@@ -1059,7 +1070,7 @@ function renderWeek() {
     const mon = getViewWeekMonday();
     const pays = getPaydaysForWeek(mon);
     const hasPay = pays.some(p=>p.day===day);
-    const tags = [...(d.tags||[]),...(hasPay?['💰 Payday']:[])]
+    const tags = [...(d.tags||[]),...(hasPay?['ð° Payday']:[])]
       .map(t=>{
         const c=t.toLowerCase().includes('workout')?'workout':t.includes('Off')||t.includes('Reset')?'shared':t.includes('Payday')?'payday':'';
         return `<span class="day-tag ${c}">${t}</span>`;
@@ -1087,10 +1098,10 @@ function renderWeek() {
                 <span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:160px">${t.label}</span>
               </div>
             `).join('')}
-            ${sec.tasks.length>3?`<div style="font-size:0.68rem;color:var(--muted);padding-left:10px">+${sec.tasks.length-3} more…</div>`:''}
+            ${sec.tasks.length>3?`<div style="font-size:0.68rem;color:var(--muted);padding-left:10px">+${sec.tasks.length-3} moreâ¦</div>`:''}
           </div>
         `).join('')}
-        ${d.sections.length>2?`<div style="font-size:0.72rem;color:var(--muted);margin-top:4px;text-align:center">Tap to see all ${d.sections.length} sections →</div>`:''}
+        ${d.sections.length>2?`<div style="font-size:0.72rem;color:var(--muted);margin-top:4px;text-align:center">Tap to see all ${d.sections.length} sections â</div>`:''}
       </div>`;
     grid.appendChild(card);
   });
@@ -1106,7 +1117,7 @@ function updateWeekCardProgress(day) {
   renderDayPicker('day-picker-week', d=>false, 'jumpToDay');
 }
 
-// ─── DAY VIEW ─────────────────────────────────────────────────────────────────
+// âââ DAY VIEW âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function jumpToDay(day) {
   currentDay = day;
   showView('day');
@@ -1125,7 +1136,7 @@ function renderDayView() {
   const day = currentDay;
   renderPaydayBanner('payday-banner-day');
   renderWeekNav('week-nav-day');
-  document.getElementById('day-view-title').textContent = day + ' · ' + toDateStr(getDateForDay(day));
+  document.getElementById('day-view-title').textContent = day + ' Â· ' + toDateStr(getDateForDay(day));
   updateDayProgress(day);
   renderDayPicker('day-picker-day', d=>d===day, 'setDay');
 
@@ -1133,7 +1144,7 @@ function renderDayView() {
   const mon = getViewWeekMonday();
   const pays = getPaydaysForWeek(mon);
   const hasPay = pays.some(p=>p.day===day);
-  const tags = [...(d.tags||[]),...(hasPay?['💰 Payday']:[])]
+  const tags = [...(d.tags||[]),...(hasPay?['ð° Payday']:[])]
     .map(t=>{
       const c=t.toLowerCase().includes('workout')?'workout':t.includes('Off')||t.includes('Reset')?'shared':t.includes('Payday')?'payday':'';
       return `<span class="day-tag ${c}">${t}</span>`;
@@ -1141,13 +1152,14 @@ function renderDayView() {
 
   let body = `<div class="day-card-header"><h3>${day}</h3><div class="day-tags">${tags}</div></div><div class="day-body">`;
   d.sections.forEach((sec,si) => {
-    body += `<div class="section-label">${sec.label}<button class="sec-edit" onclick="renameSection('${day}',${si})">✎</button></div>`;
+    body += `<div class="section-label">${sec.label}<button class="sec-edit" onclick="renameSection('${day}',${si})">â</button></div>`;
     sec.tasks.forEach((t,ti) => { body += taskHtml(t, day, si, ti, true); });
     body += `<button class="add-task-btn" onclick="openAddModal('${day}',${si})">+ Add task</button>`;
   });
   body += `<button class="add-section-btn" onclick="addSection('${day}')">+ Add section</button></div>`;
   document.getElementById('day-card-full').innerHTML = body;
   initDrag();
+  renderConflictBanner(day);
 }
 
 function setDay(day) {
@@ -1165,7 +1177,7 @@ function updateDayProgress(day) {
   if (pbEl) pbEl.style.width = pct+'%';
 }
 
-// ─── TASK HTML ────────────────────────────────────────────────────────────────
+// âââ TASK HTML ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function taskHtml(t, day, si, ti, showCheck) {
   const done = isChecked(day, si, ti);
   const who = t.who ? `<span class="who">${t.who}</span>` : '';
@@ -1179,8 +1191,8 @@ function taskHtml(t, day, si, ti, showCheck) {
     <span class="l">${t.label}</span>
     ${who}
     <span class="row-btns">
-      <button class="row-btn" onclick="openEditModal('${day}',${si},${ti});event.stopPropagation()">✎</button>
-      <button class="row-btn del" onclick="quickDelete('${day}',${si},${ti});event.stopPropagation()">✕</button>
+      <button class="row-btn" onclick="openEditModal('${day}',${si},${ti});event.stopPropagation()">â</button>
+      <button class="row-btn del" onclick="quickDelete('${day}',${si},${ti});event.stopPropagation()">â</button>
     </span>
   </div>`;
 }
@@ -1191,7 +1203,7 @@ function renderLegend() {
   ).join('');
 }
 
-// ─── DRAG & DROP ──────────────────────────────────────────────────────────────
+// âââ DRAG & DROP ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function initDrag() {
   document.querySelectorAll('.task-row').forEach(row => {
     row.addEventListener('dragstart', e => {
@@ -1210,12 +1222,12 @@ function initDrag() {
       const dsTgt = ensureDateSchedule(tgt.day);
       const [moved] = dateSchedules[dsSrc].sections[dragSrc.si].tasks.splice(dragSrc.ti,1);
       dateSchedules[dsTgt].sections[tgt.si].tasks.splice(tgt.ti,0,moved);
-      save(); renderCurrentView(); toast('Moved ✓');
+      save(); renderCurrentView(); toast('Moved â');
     });
   });
 }
 
-// ─── SECTIONS ─────────────────────────────────────────────────────────────────
+// âââ SECTIONS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function addSection(day) {
   const n = prompt('Section name:');
   if (n?.trim()) { const ds=ensureDateSchedule(day); dateSchedules[ds].sections.push({label:n.trim(),tasks:[]}); save(); renderCurrentView(); }
@@ -1225,7 +1237,224 @@ function renameSection(day, si) {
   if (n?.trim()) { const ds=ensureDateSchedule(day); dateSchedules[ds].sections[si].label=n.trim(); save(); renderCurrentView(); }
 }
 
-// ─── MODAL ────────────────────────────────────────────────────────────────────
+// âââ MODAL ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+// ─── SCHEDULE CONFLICT DETECTION ─────────────────────────────────────────────────────────────────────────────
+
+// Convert time string (e.g. "7:40 AM", "~6:00 PM") to minutes since midnight
+function timeToMinutes(ts) {
+  if (!ts) return -1;
+  const clean = ts.replace(/^[~≈\s]+/, '').trim();
+  const m = clean.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+  if (!m) return -1;
+  let h = +m[1], mn = +m[2];
+  const ap = m[3] ? m[3].toUpperCase() : null;
+  if (ap === 'PM' && h !== 12) h += 12;
+  if (ap === 'AM' && h === 12) h = 0;
+  if (!ap && h < 5) h += 12; // no AM/PM: treat <5 as PM
+  return h * 60 + mn;
+}
+
+// Convert minutes-since-midnight to "H:MM AM/PM"
+function minutesToTime(mins) {
+  const h = Math.floor(mins / 60) % 24;
+  const m = mins % 60;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+  return h12 + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+}
+
+// Estimate a task's duration in minutes
+function getTaskDuration(task) {
+  if (!task || !task.label) return 30;
+  // Explicit "X min" in label
+  const minMatch = task.label.match(/(\d+)\s*min/i);
+  if (minMatch) return Math.min(+minMatch[1], 600);
+  // Time range in label e.g. "5–8 PM" or "5:30–6:30"
+  const rng = task.label.match(/(\d+)(?::(\d+))?\s*[–-]\s*(\d+)(?::(\d+))?\s*(AM|PM)?/i);
+  if (rng) {
+    let s = +rng[1] * 60 + +(rng[2] || 0);
+    let e = +rng[3] * 60 + +(rng[4] || 0);
+    const ap = rng[5] ? rng[5].toUpperCase() : null;
+    if (ap === 'PM' && +rng[3] !== 12) e += 720;
+    if (ap === 'PM' && +rng[1] !== 12) s += 720;
+    if (e > s && (e - s) < 600) return e - s;
+  }
+  if (task.cat === 'cat-travel') return 40;
+  if (task.cat === 'cat-s' || task.cat === 'cat-j') return 60;
+  if (task.cat === 'cat-sleep') return 30;
+  return 30;
+}
+
+// Find away windows for a person on a given day (times when they are NOT home/available)
+// Returns [{start, end, label}] in minutes
+function getAwayWindows(day, person) {
+  const sched = getScheduleForDay(day);
+  const flat = [];
+  sched.sections.forEach((sec, si) => sec.tasks.forEach((t, ti) => flat.push({...t, si, ti})));
+  flat.sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+  const windows = [];
+
+  flat.forEach((t, idx) => {
+    const applies = t.who === person || t.who === '' || !t.who;
+    if (!applies) return;
+    const tStart = timeToMinutes(t.time);
+    if (tStart < 0) return;
+
+    // Departure/commute task = start of away window
+    if (t.cat === 'cat-travel' && t.who === person) {
+      let returnMin = tStart + 480;
+      flat.forEach(t2 => {
+        if (t2.si === t.si && t2.ti === t.ti) return;
+        const t2A = t2.who === person || t2.who === '' || !t2.who;
+        if (!t2A) return;
+        const t2Min = timeToMinutes(t2.time);
+        if (t2Min <= tStart) return;
+        if (/\b(off|home|drives home|back|returns?)\b/i.test(t2.label) && t2Min < returnMin)
+          returnMin = t2Min;
+      });
+      windows.push({start: tStart, end: returnMin, label: 'commute/away: ' + t.label.slice(0, 40)});
+    }
+
+    // Work task (cat-s for Szymon, cat-j for Jarret) = at work
+    const isWork = (t.cat === 'cat-s' && person === 'S') || (t.cat === 'cat-j' && person === 'J');
+    if (isWork) {
+      let workEnd = tStart + 60;
+      flat.forEach(t2 => {
+        const t2A = t2.who === person || t2.who === '' || !t2.who;
+        if (!t2A) return;
+        const t2Min = timeToMinutes(t2.time);
+        if (t2Min <= tStart) return;
+        if (/\b(off|done|home|drives)\b/i.test(t2.label) && t2Min < tStart + 600)
+          workEnd = Math.max(workEnd, t2Min);
+      });
+      windows.push({start: tStart, end: workEnd, label: 'at work: ' + t.label.slice(0, 40)});
+    }
+  });
+
+  // Merge overlapping windows
+  windows.sort((a, b) => a.start - b.start);
+  const merged = [];
+  windows.forEach(w => {
+    const last = merged[merged.length - 1];
+    if (last && w.start <= last.end) {
+      last.end = Math.max(last.end, w.end);
+      last.label = last.label; // keep first label
+    } else merged.push({...w});
+  });
+  return merged;
+}
+
+// Check a proposed task for conflicts. Returns array of HTML conflict strings.
+// skipEdit = {si, ti} to ignore the task being edited
+function checkConflicts(day, newTask, skipEdit) {
+  const conflicts = [];
+  const newStart = timeToMinutes(newTask.time);
+  if (newStart < 0) return [];
+  const newEnd = newStart + getTaskDuration(newTask);
+  const newPerson = newTask.who; // 'S', 'J', or ''
+
+  const sched = getScheduleForDay(day);
+  const flat = [];
+  sched.sections.forEach((sec, si) => sec.tasks.forEach((t, ti) => flat.push({...t, si, ti})));
+  const seen = new Set();
+
+  // 1. Time overlap with existing tasks for the same person
+  flat.forEach(t => {
+    if (skipEdit && t.si === skipEdit.si && t.ti === skipEdit.ti) return;
+    const tPerson = t.who;
+    const overlapS = (newPerson === 'S' || newPerson === '') && (tPerson === 'S' || tPerson === '');
+    const overlapJ = (newPerson === 'J' || newPerson === '') && (tPerson === 'J' || tPerson === '');
+    if (!overlapS && !overlapJ) return;
+    const tStart = timeToMinutes(t.time);
+    if (tStart < 0) return;
+    const tEnd = tStart + getTaskDuration(t);
+    // Overlap: ranges intersect AND not same start (same start = common "at the same time" pattern)
+    if (newStart < tEnd && newEnd > tStart && Math.abs(newStart - tStart) > 1) {
+      const who = overlapS && overlapJ ? 'Both' : (overlapS ? 'Szymon' : 'Jarret');
+      const key = who + tStart + tEnd;
+      if (!seen.has(key)) {
+        seen.add(key);
+        conflicts.push(
+          '⏰ <strong>Overlap (' + who + '):</strong> "' +
+          newTask.label.slice(0,30) + '" overlaps "' + t.label.slice(0,30) + '" at ' + t.time
+        );
+      }
+    }
+  });
+
+  // 2. Task scheduled during away/work window
+  const personsToCheck = newPerson ? [newPerson] : ['S', 'J'];
+  personsToCheck.forEach(p => {
+    // Don't flag travel or work tasks themselves
+    const isTravelOrWork = (newTask.cat === 'cat-travel' && newTask.who === p) ||
+      (newTask.cat === 'cat-s' && p === 'S') || (newTask.cat === 'cat-j' && p === 'J');
+    if (isTravelOrWork) return;
+    const pName = p === 'S' ? 'Szymon' : 'Jarret';
+    getAwayWindows(day, p).forEach(w => {
+      if (newStart >= w.start && newStart < w.end) {
+        const key = p + w.start;
+        if (!seen.has(key)) {
+          seen.add(key);
+          conflicts.push(
+            '🏃 <strong>' + pName + ' is away</strong> ' + w.label.slice(0,40) +
+            ' (' + minutesToTime(w.start) + '–' + minutesToTime(w.end) + ')' +
+            ' — task at ' + newTask.time + ' conflicts'
+          );
+        }
+      }
+    });
+  });
+
+  return conflicts;
+}
+
+// Get all conflicts for a given day's schedule
+function getDayConflicts(day) {
+  const sched = getScheduleForDay(day);
+  const flat = [];
+  sched.sections.forEach((sec, si) => sec.tasks.forEach((t, ti) => flat.push({...t, si, ti})));
+  const all = [];
+  const seen = new Set();
+  flat.forEach(task => {
+    checkConflicts(day, task, {si: task.si, ti: task.ti}).forEach(c => {
+      if (!seen.has(c)) { seen.add(c); all.push({msg: c, si: task.si, ti: task.ti}); }
+    });
+  });
+  return all;
+}
+
+// Render the conflict banner in the day view
+function renderConflictBanner(day) {
+  const el = document.getElementById('conflict-banner-day');
+  if (!el) return;
+  const conflicts = getDayConflicts(day);
+  if (!conflicts.length) { el.classList.remove('show'); el.innerHTML = ''; return; }
+  el.innerHTML = '<strong>⚠ Schedule Conflicts on ' + day + ':</strong><ul>' +
+    conflicts.map(c => '<li>' + c.msg + '</li>').join('') + '</ul>';
+  el.classList.add('show');
+}
+
+// Live conflict check for the add/edit modal
+function checkModalConflict() {
+  const el = document.getElementById('modal-conflict-msg');
+  if (!el) return;
+  const time = document.getElementById('f-time').value.trim();
+  const day = document.getElementById('f-day').value;
+  if (!time || !day) { el.classList.remove('show'); return; }
+  const testTask = {
+    time,
+    label: document.getElementById('f-label').value.trim() || 'New task',
+    cat: document.getElementById('f-cat').value,
+    who: document.getElementById('f-who').value
+  };
+  const conflicts = checkConflicts(day, testTask, editing ? {si: editing.si, ti: editing.ti} : null);
+  if (!conflicts.length) { el.classList.remove('show'); el.innerHTML = ''; return; }
+  el.innerHTML = '<strong>⚠ Possible conflicts:</strong><ul>' +
+    conflicts.map(c => '<li>' + c + '</li>').join('') + '</ul>';
+  el.classList.add('show');
+}
+
 function openEditModal(day, si, ti) {
   const sched = getScheduleForDay(day);
   const t = sched.sections[si].tasks[ti];
@@ -1239,6 +1468,7 @@ function openEditModal(day, si, ti) {
   document.getElementById('f-section').value = sched.sections[si].label;
   document.getElementById('del-btn').style.display = 'block';
   document.getElementById('task-modal').classList.add('open');
+  setTimeout(checkModalConflict, 50);
 }
 function openAddModal(day, si) {
   editing = null;
@@ -1251,6 +1481,7 @@ function openAddModal(day, si) {
   document.getElementById('f-section').value = si!==undefined ? getScheduleForDay(day).sections[si].label : '';
   document.getElementById('del-btn').style.display = 'none';
   document.getElementById('task-modal').classList.add('open');
+  setTimeout(checkModalConflict, 50);
 }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function saveTask() {
@@ -1273,6 +1504,11 @@ function saveTask() {
     if (si<0) { dateSchedules[ds].sections.push({label:secName||'General',tasks:[]}); si=dateSchedules[ds].sections.length-1; }
     dateSchedules[ds].sections[si].tasks.push(t);
   }
+  const _conflictsBeforeSave = checkConflicts(day, t, editing ? {si: editing.si, ti: editing.ti} : null);
+  if (_conflictsBeforeSave.length) {
+    const proceed = confirm('⚠ Schedule conflicts detected:\n\n' + _conflictsBeforeSave.map(c=>c.replace(/<[^>]+>/g,'')).join('\n') + '\n\nSave anyway?');
+    if (!proceed) return;
+  }
   save(); closeModal('task-modal'); renderCurrentView(); toast('Saved ✓');
 }
 function deleteTask() {
@@ -1288,8 +1524,8 @@ function quickDelete(day, si, ti) {
   save(); renderCurrentView(); toast('Deleted');
 }
 
-// ─── CALENDAR ─────────────────────────────────────────────────────────────────
-const CAL_ROW = 48; // px per hour — taller = less cramped
+// âââ CALENDAR âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+const CAL_ROW = 48; // px per hour â taller = less cramped
 function toY(ts) {
   const m = ts.match(/(\d+):(\d+)\s*(AM|PM)/i); if (!m) return -1;
   let h=+m[1], mn=+m[2], ap=m[3].toUpperCase();
@@ -1327,12 +1563,12 @@ function renderCalendar() {
       const done = isChecked(day,si,ti);
       const totalCols = col+1;
       // keep label short and clean
-      const shortLabel = t.label.replace(/^(Szymon —|Jarret —|Both —)\s*/i,'').slice(0,22);
+      const shortLabel = t.label.replace(/^(Szymon â|Jarret â|Both â)\s*/i,'').slice(0,22);
       const leftPct = col===0 ? 1 : col*33;
       const widthPct = col===0 ? 98 : 99 - leftPct;
       html+=`<div class="cal-task${done?' done-cal':''}"
         style="top:${y}px;left:${leftPct}%;width:${widthPct}%;background:${c}18;border-left:3px solid ${c};color:${c};z-index:${10+col}"
-        onclick="openEditModal('${day}',${si},${ti})" title="${t.time} — ${t.label}">
+        onclick="openEditModal('${day}',${si},${ti})" title="${t.time} â ${t.label}">
         <div class="ct-t">${t.time}</div>
         <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${shortLabel}</div>
       </div>`;
@@ -1344,7 +1580,7 @@ function renderCalendar() {
   document.getElementById('cal-wrap').innerHTML = html;
 }
 
-// ─── STATS ────────────────────────────────────────────────────────────────────
+// âââ STATS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderStats() {
   const cnt={},chk={}; let total=0, totalDone=0;
   Object.keys(CATS).forEach(k=>{cnt[k]=0;chk[k]=0;});
@@ -1377,7 +1613,7 @@ function renderStats() {
   }).join('')+`</div>`;
 }
 
-// ─── ICS EXPORT ───────────────────────────────────────────────────────────────
+// âââ ICS EXPORT âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function openIcsModal() { document.getElementById('ics-modal').classList.add('open'); }
 function pad(n){return String(n).padStart(2,'0');}
 function timeStrToHHMM(ts){
@@ -1426,14 +1662,14 @@ function exportIcs(who) {
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=who==='S'?'szymon-schedule.ics':who==='J'?'jarret-schedule.ics':'our-schedule.ics';
   a.click(); closeModal('ics-modal');
-  toast('📅 Open the .ics file to import into Apple Calendar!');
+  toast('ð Open the .ics file to import into Apple Calendar!');
 }
 
-// ─── BACKUP / RESTORE ─────────────────────────────────────────────────────────
+// âââ BACKUP / RESTORE âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function exportJSON() {
   const blob=new Blob([JSON.stringify({schedule,checked},null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='schedule-backup.json'; a.click();
-  toast('Backup downloaded ✓');
+  toast('Backup downloaded â');
 }
 function importJSON(){document.getElementById('json-import-input').click();}
 function handleImport(e) {
@@ -1445,7 +1681,7 @@ function handleImport(e) {
       if(data.schedule) { schedule=data.schedule; if(data.checked) checked=data.checked; }
       else { schedule=data; } // legacy
       save(); localStorage.setItem('couple_checked',JSON.stringify(checked));
-      renderCurrentView(); toast('Schedule restored ✓');
+      renderCurrentView(); toast('Schedule restored â');
     }catch{toast('Invalid backup file');}
   };
   r.readAsText(file); e.target.value='';
@@ -1454,27 +1690,27 @@ function resetSchedule() {
   if (confirm('Reset to original schedule? Checkmarks and date-specific schedules will also be cleared.')) {
     schedule=deepClone(DEFAULT); checked={}; dateSchedules={};
     save(); localStorage.setItem('couple_checked','{}'); localStorage.removeItem('couple_date_schedules');
-    renderCurrentView(); toast('Reset to original ✓');
+    renderCurrentView(); toast('Reset to original â');
   }
 }
 
-// ─── TOAST ────────────────────────────────────────────────────────────────────
+// âââ TOAST ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function toast(msg) {
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2700);
 }
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+// âââ INIT âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 detectServer();
 renderWeek();
 
-// ─── THEME ─────────────────────────────────────────────────────────────────
+// âââ THEME âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let isDark = localStorage.getItem('szjr_theme') !== 'light';
 function applyTheme() {
   document.body.classList.toggle('light-mode', !isDark);
   const icon = document.getElementById('theme-icon');
-  if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+  if (icon) icon.textContent = isDark ? 'âï¸' : 'ð';
 }
 function toggleTheme() {
   isDark = !isDark;
@@ -1482,7 +1718,7 @@ function toggleTheme() {
   applyTheme();
 }
 
-// ─── BOTTOM NAV SYNC ──────────────────────────────────────────────────────
+// âââ BOTTOM NAV SYNC ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const origShowView = showView;
 function showView(v) {
   currentView = v;
@@ -1500,7 +1736,7 @@ function showView(v) {
   if (v==='stats') renderStats();
 }
 
-// ─── SWIPE BETWEEN DAYS ───────────────────────────────────────────────────
+// âââ SWIPE BETWEEN DAYS âââââââââââââââââââââââââââââââââââââââââââââââââââ
 let swipeStartX = 0, swipeStartY = 0;
 document.addEventListener('touchstart', e => {
   swipeStartX = e.touches[0].clientX;
@@ -1522,7 +1758,7 @@ document.addEventListener('touchend', e => {
   }
 }, {passive:true});
 
-// ─── TODAY DATE DISPLAY ───────────────────────────────────────────────────
+// âââ TODAY DATE DISPLAY âââââââââââââââââââââââââââââââââââââââââââââââââââ
 function getDayDateString(day) {
   const today = new Date();
   const map=[0,1,2,3,4,5,6];
@@ -1542,7 +1778,7 @@ renderDayView = function() {
   if (el) el.textContent = getDayDateString(currentDay);
 };
 
-// ─── STREAK SYSTEM ────────────────────────────────────────────────────────
+// âââ STREAK SYSTEM ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function calcStreak() {
   const streakData = JSON.parse(localStorage.getItem('szjr_streak')||'{}');
   const now = new Date();
@@ -1569,12 +1805,12 @@ function renderStreakBanner(id) {
   if (!el) return;
   const {streak, curPct} = calcStreak();
   if (streak === 0 && curPct < 10) { el.innerHTML=''; return; }
-  let icon='📅', title='', sub='';
-  if (streak >= 3) { icon='🔥'; title=streak+'-week streak!'; sub='You\'ve hit 80%+ for '+streak+' weeks running'; }
-  else if (streak === 2) { icon='🔥'; title='2-week streak!'; sub='Keep it going — hit 80% this week'; }
-  else if (streak === 1) { icon='✨'; title='First week complete!'; sub='Hit 80%+ again to start a streak'; }
-  else { icon='📅'; title='This week: '+curPct+'% done'; sub='Reach 80% completion to start a streak'; }
-  el.innerHTML = '<div class="streak-banner-inner"><span class="streak-flame">'+icon+'</span><div class="streak-info"><strong>'+title+'</strong><span>'+sub+' · This week: '+curPct+'%</span></div></div>';
+  let icon='ð', title='', sub='';
+  if (streak >= 3) { icon='ð¥'; title=streak+'-week streak!'; sub='You\'ve hit 80%+ for '+streak+' weeks running'; }
+  else if (streak === 2) { icon='ð¥'; title='2-week streak!'; sub='Keep it going â hit 80% this week'; }
+  else if (streak === 1) { icon='â¨'; title='First week complete!'; sub='Hit 80%+ again to start a streak'; }
+  else { icon='ð'; title='This week: '+curPct+'% done'; sub='Reach 80% completion to start a streak'; }
+  el.innerHTML = '<div class="streak-banner-inner"><span class="streak-flame">'+icon+'</span><div class="streak-info"><strong>'+title+'</strong><span>'+sub+' Â· This week: '+curPct+'%</span></div></div>';
 }
 
 // Patch toggleCheck to update streak
@@ -1594,7 +1830,7 @@ renderWeek = function() {
   renderStreakBanner('streak-banner-week');
 };
 
-// ─── TASK NOTES (📝 button) ───────────────────────────────────────────────
+// âââ TASK NOTES (ð button) âââââââââââââââââââââââââââââââââââââââââââââââ
 let taskNotes = JSON.parse(localStorage.getItem('szjr_task_notes')||'{}');
 function noteKey(day,si,ti){ return day+'-'+si+'-'+ti; }
 function getTaskNote(day,si,ti){ return taskNotes[noteKey(day,si,ti)]||''; }
@@ -1610,7 +1846,7 @@ function openNotePrompt(day,si,ti,e) {
   if (val !== null) {
     saveTaskNote(day,si,ti,val.trim());
     renderCurrentView();
-    toast(val.trim() ? 'Note saved ✓' : 'Note removed');
+    toast(val.trim() ? 'Note saved â' : 'Note removed');
   }
 }
 
@@ -1620,7 +1856,7 @@ taskHtml = function(t, day, si, ti, showCheck) {
   const note = getTaskNote(day,si,ti);
   const done = isChecked(day, si, ti);
   const who = t.who ? '<span class="who">'+t.who+'</span>' : '';
-  const noteDot = note ? '<span class="task-has-note" onclick="toggleTaskNote(this)" title="'+note.replace(/"/g,'&quot;')+'">●</span>' : '';
+  const noteDot = note ? '<span class="task-has-note" onclick="toggleTaskNote(this)" title="'+note.replace(/"/g,'&quot;')+'">â</span>' : '';
   const noteHtml = note ? '<div class="task-note-text">'+note+'</div>' : '';
   const check = showCheck
     ? `<div class="task-check${done?' checked':''}" onclick="toggleCheck('${day}',${si},${ti},this);event.stopPropagation()"></div>`
@@ -1632,9 +1868,9 @@ taskHtml = function(t, day, si, ti, showCheck) {
     + `<span class="l">${t.label}${noteDot}</span>`
     + who
     + '<span class="row-btns">'
-    + `<button class="row-btn note-btn" onclick="openNotePrompt('${day}',${si},${ti},event)" title="Note">📝</button>`
-    + `<button class="row-btn" onclick="openEditModal('${day}',${si},${ti});event.stopPropagation()">✎</button>`
-    + `<button class="row-btn del" onclick="quickDelete('${day}',${si},${ti});event.stopPropagation()">✕</button>`
+    + `<button class="row-btn note-btn" onclick="openNotePrompt('${day}',${si},${ti},event)" title="Note">ð</button>`
+    + `<button class="row-btn" onclick="openEditModal('${day}',${si},${ti});event.stopPropagation()">â</button>`
+    + `<button class="row-btn del" onclick="quickDelete('${day}',${si},${ti});event.stopPropagation()">â</button>`
     + '</span>'
     + noteHtml
     + '</div>';
@@ -1644,7 +1880,7 @@ function toggleTaskNote(dotEl) {
   if (row) row.classList.toggle('note-open');
 }
 
-// ─── PIN SYSTEM ───────────────────────────────────────────────────────────
+// âââ PIN SYSTEM âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let pinEntry = '', setupPin1 = '', setupPin2 = '';
 const PIN_SALT = 'szjr2024sched';
 function hashPin(p) {
@@ -1702,9 +1938,9 @@ function confirmKey(k) {
   if(setupPin2.length>=4) return; setupPin2+=k; updatePinDots(setupPin2.length,'psc');
   if(setupPin2.length===4){
     setTimeout(()=>{
-      if(setupPin1===setupPin2){setStoredPin(setupPin1);closeModal('pin-setup-modal');toast('PIN set ✓');}
+      if(setupPin1===setupPin2){setStoredPin(setupPin1);closeModal('pin-setup-modal');toast('PIN set â');}
       else{
-        document.getElementById('pin-confirm-error').textContent="PINs don't match — try again";
+        document.getElementById('pin-confirm-error').textContent="PINs don't match â try again";
         setupPin2=''; updatePinDots(0,'psc');
         for(let i=0;i<4;i++){const d=document.getElementById('psc'+i);if(d){d.classList.add('error');setTimeout(()=>d.classList.remove('error'),700);}}
       }
@@ -1714,7 +1950,7 @@ function confirmKey(k) {
 function confirmBackspace(){ if(setupPin2.length>0){setupPin2=setupPin2.slice(0,-1);updatePinDots(setupPin2.length,'psc');} }
 function removePin(){ if(confirm('Remove PIN protection?')){removeStoredPin();closeModal('pin-setup-modal');toast('PIN removed');} }
 
-// ─── STATS STREAK CARD ────────────────────────────────────────────────────
+// âââ STATS STREAK CARD ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const _origRenderStats = renderStats;
 renderStats = function() {
   _origRenderStats.apply(this, arguments);
@@ -1724,14 +1960,14 @@ renderStats = function() {
   cards.forEach(c=>{
     const lbl=c.querySelector('.stat-lbl');
     if(lbl&&lbl.textContent.includes('App Dev')){
-      lbl.textContent='🔥 Week Streak';
+      lbl.textContent='ð¥ Week Streak';
       c.querySelector('.stat-val').textContent=streak;
       c.querySelector('.stat-val').style.color='#FFC864';
     }
   });
 };
 
-// ─── INIT OVERRIDES ───────────────────────────────────────────────────────
+// âââ INIT OVERRIDES âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 applyTheme();
 initPinScreen();
 renderStreakBanner('streak-banner-week');
