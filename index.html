@@ -1393,7 +1393,7 @@ function checkConflicts(day, newTask, skipEdit) {
     const tStart = timeToMinutes(t.time);
     if (tStart < 0) return;
     const tEnd = tStart + getTaskDuration(t);
-    if (newStart < tEnd && newEnd > tStart && (Math.min(newEnd, tEnd) - Math.max(newStart, tStart)) >= 10) {
+    if (newStart < tEnd && newEnd > tStart && (Math.min(newEnd, tEnd) - Math.max(newStart, tStart)) >= 15) {
       const who = overlapS && overlapJ ? 'Both' : (overlapS ? 'Szymon' : 'Jarret');
       const key = who + tStart + tEnd;
       if (!seen.has(key)) {
