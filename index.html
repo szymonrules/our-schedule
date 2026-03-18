@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#0F0F10;--surface:#161618;--surface2:#1E1E22;--surface3:#26262C;--border:#2C2C34;
+  --bg:#0F0F10;--surface:#161618;--srface2:#1E1E22;--surface3:#26262C;--border:#2C2C34;
   --text:#E8E6E0;--muted:#7A7880;
   --s:#5B9BD5;--s-dim:rgba(91,155,213,0.13);
   --j:#6BBF7A;--j-dim:rgba(107,191,122,0.13);
@@ -188,6 +188,7 @@ body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);min-he
 .time-slot{height:48px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:0.6rem;color:var(--muted);border-bottom:1px solid rgba(44,44,52,0.4);flex-shrink:0;}
 .cal-col{border-left:1px solid var(--border);position:relative;}
 .cal-task{position:absolute;left:2px;right:2px;border-radius:4px;padding:2px 4px;font-size:0.62rem;line-height:1.25;overflow:hidden;cursor:pointer;z-index:1;min-height:17px;}
+.cat-dimmed{opacity:0.2!important;}
 .cal-task:hover{z-index:10;filter:brightness(1.2);}
 .cal-task .ct-t{font-weight:700;font-size:0.58rem;opacity:0.85;}
 .cal-task.done-cal{opacity:0.4;}
@@ -200,7 +201,11 @@ body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);min-he
 
 /* LEGEND */
 .legend{display:flex;flex-wrap:wrap;gap:6px;}
-.leg{display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--muted);padding:3px 8px;background:var(--surface);border-radius:5px;border:1px solid var(--border);}
+.leg{display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--muted);padding:3px 8px;background:var(--surface);border-radius:5px;border:1px solid var(--border);cursor:pointer;transition:opacity 0.15s,border-color 0.15s,background 0.15s;user-select:none;}
+.leg:hover{border-color:var(--text);color:var(--text);}
+.leg.active{background:rgba(255,255,255,0.1);color:var(--text);border-color:var(--text);opacity:1;}
+.leg.dimmed{opacity:0.3;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;}
 .leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 
 /* SERVER BANNER */
@@ -923,6 +928,7 @@ async function detectServer() {
           localStorage.setItem('couple_date_schedules', JSON.stringify(dateSchedules));
           delete data._dateSchedules;
         }
+        if (data._version) { _serverVersion = data._version; delete data._version; }
         schedule = data;
         localStorage.setItem('couple_schedule', JSON.stringify(schedule));
       }
@@ -940,11 +946,26 @@ function setSyncStatus(state,label) {
   dot.className = 'sync-dot '+(state==='synced'?'synced':state==='syncing'?'syncing':state==='error'?'error':'');
   document.getElementById('sync-label').textContent = label;
 }
+let _serverVersion = 0; // version token for conflict detection
+
 async function saveToServer() {
   if (!isServerMode) return;
   setSyncStatus('syncing','Saving…');
   try {
-    await fetch('/api/schedule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...schedule, _dateSchedules: dateSchedules})});
+    const payload = {...schedule, _dateSchedules: dateSchedules, _version: _serverVersion + 1};
+    const r = await fetch('/api/schedule', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'If-Match': String(_serverVersion)},
+      body: JSON.stringify(payload)
+    });
+    if (r.status === 409) {
+      // Conflict: someone else saved while we were editing
+      const msg = 'Someone else updated the schedule. Reload to get their changes, then re-apply yours.';
+      if (confirm(msg + '\n\nReload now?')) location.reload();
+      setSyncStatus('error', 'Conflict ⚠');
+      return;
+    }
+    _serverVersion++;
     setSyncStatus('synced','Synced ✓');
   } catch { setSyncStatus('error','Sync failed'); }
 }
@@ -1101,7 +1122,7 @@ function renderWeek() {
             ${sec.tasks.length>3?`<div style="font-size:0.68rem;color:var(--muted);padding-left:10px">+${sec.tasks.length-3} more…</div>`:''}
           </div>
         `).join('')}
-        ${d.sections.length>2?`<div style="font-size:0.72rem;color:var(--muted);margin-top:4px;text-align:center">Tap to see all ${d.sections.length} sections →</div>`:''}
+        ${d.sections.length>2?`<div style="font-size:0.72rem;color:var(--muted);margin-top:4px;text-align:center">Click to see all ${d.sections.length} sections →</div>`:''}
       </div>`;
     grid.appendChild(card);
   });
@@ -1153,7 +1174,7 @@ function renderDayView() {
   let body = `<div class="day-card-header"><h3>${day}</h3><div class="day-tags">${tags}</div></div><div class="day-body">`;
   d.sections.forEach((sec,si) => {
     body += `<div class="section-label">${sec.label}<button class="sec-edit" onclick="renameSection('${day}',${si})">✎</button></div>`;
-    sec.tasks.forEach((t,ti) => { body += taskHtml(t, day, si, ti, true); });
+    sec.tasks.forEach((t,ti) => { if (taskMatchesFilter(t)) body += taskHtml(t, day, si, ti, true); });
     body += `<button class="add-task-btn" onclick="openAddModal('${day}',${si})">+ Add task</button>`;
   });
   body += `<button class="add-section-btn" onclick="addSection('${day}')">+ Add section</button></div>`;
@@ -1197,10 +1218,29 @@ function taskHtml(t, day, si, ti, showCheck) {
   </div>`;
 }
 
+// Active category filters (null = show all)
+let activeCatFilters = new Set();
+
 function renderLegend() {
-  document.getElementById('legend').innerHTML = Object.entries(CATS).map(([k,v])=>
-    `<span class="leg"><span class="leg-dot" style="background:${v.color}"></span>${v.label}</span>`
+  const container = document.getElementById('legend');
+  container.innerHTML = Object.entries(CATS).map(([k,v])=>
+    `<span class="leg${activeCatFilters.size > 0 && !activeCatFilters.has(k) ? ' dimmed' : activeCatFilters.has(k) ? ' active' : ''}" data-cat="${k}" onclick="toggleCatFilter('${k}')" title="Filter: ${v.label}"><span class="leg-dot" style="background:${v.color}"></span>${v.label}</span>`
   ).join('');
+}
+
+function toggleCatFilter(catKey) {
+  if (activeCatFilters.has(catKey)) {
+    activeCatFilters.delete(catKey);
+  } else {
+    activeCatFilters.add(catKey);
+  }
+  renderLegend();
+  renderCurrentView();
+}
+
+function taskMatchesFilter(task) {
+  if (activeCatFilters.size === 0) return true;
+  return activeCatFilters.has(task.cat);
 }
 
 // ─── DRAG & DROP ──────────────────────────────────────────────────────────────
@@ -1353,7 +1393,7 @@ function checkConflicts(day, newTask, skipEdit) {
     const tStart = timeToMinutes(t.time);
     if (tStart < 0) return;
     const tEnd = tStart + getTaskDuration(t);
-    if (newStart < tEnd && newEnd > tStart && Math.abs(newStart - tStart) > 1) {
+    if (newStart < tEnd && newEnd > tStart && (Math.min(newEnd, tEnd) - Math.max(newStart, tStart)) >= 10) {
       const who = overlapS && overlapJ ? 'Both' : (overlapS ? 'Szymon' : 'Jarret');
       const key = who + tStart + tEnd;
       if (!seen.has(key)) {
@@ -1521,22 +1561,39 @@ function renderCalendar() {
     }));
     // sort by time
     items.sort((a,b)=>a.y-b.y);
-    // assign column slots for items within 20px of each other
-    items.forEach((item,idx)=>{
-      const prev = items.slice(0,idx).filter(p=>Math.abs(p.y-item.y)<22);
-      item.col = prev.length; // 0=full width, 1=offset right, 2=more right
+    // Assign columns using actual time overlap (not just pixel proximity)
+    // Each item gets a col index; totalCols is max needed for each overlapping group
+    items.forEach((item, idx) => {
+      const itemEnd = item.y + Math.max(CAL_ROW * 0.4, 20);
+      const overlapping = items.slice(0, idx).filter(p => {
+        const pEnd = p.y + Math.max(CAL_ROW * 0.4, 20);
+        return p.y < itemEnd && pEnd > item.y;
+      });
+      const usedCols = new Set(overlapping.map(p => p.col));
+      let col = 0;
+      while (usedCols.has(col)) col++;
+      item.col = col;
+    });
+    // Compute totalCols for each item by finding max col in its overlap group
+    items.forEach((item, idx) => {
+      const itemEnd = item.y + Math.max(CAL_ROW * 0.4, 20);
+      const group = items.filter(p => {
+        const pEnd = p.y + Math.max(CAL_ROW * 0.4, 20);
+        return p.y < itemEnd && pEnd > item.y;
+      });
+      item.totalCols = Math.max(...group.map(p => p.col)) + 1;
     });
 
-    items.forEach(({t,si,ti,y,col})=>{
+    items.forEach(({t,si,ti,y,col,totalCols})=>{
       const c=CATS[t.cat]?.color||'#888';
       const done = isChecked(day,si,ti);
-      const totalCols = col+1;
       // keep label short and clean
       const shortLabel = t.label.replace(/^(Szymon —|Jarret —|Both —)\s*/i,'').slice(0,22);
-      const leftPct = col===0 ? 1 : col*33;
-      const widthPct = col===0 ? 98 : 99 - leftPct;
-      html+=`<div class="cal-task${done?' done-cal':''}"
-        style="top:${y}px;left:${leftPct}%;width:${widthPct}%;background:${c}18;border-left:3px solid ${c};color:${c};z-index:${10+col}"
+      const colW = 98 / totalCols;
+      const leftPct = col * colW + 1;
+      const widthPct = colW - 1;
+      html+=`<div class="cal-task${done?' done-cal':''}${!taskMatchesFilter(t)?' cat-dimmed':''}"
+        style="top:${y}px;left:${leftPct.toFixed(1)}%;width:${widthPct.toFixed(1)}%;background:${c}18;border-left:3px solid ${c};color:${c};z-index:${10+col}"
         onclick="openEditModal('${day}',${si},${ti})" title="${t.time} — ${t.label}">
         <div class="ct-t">${t.time}</div>
         <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${shortLabel}</div>
